@@ -1,0 +1,736 @@
+{
+  "packVersion": 4,
+  "generatedAt": "2026-10-19T00:00:00Z",
+  "gameVersion": "7.1",
+  "versions": [
+    {
+      "id": "7.1",
+      "name": "A Rekviem for the Underworld",
+      "start": {
+        "at": "2026-09-23T06:00",
+        "clock": "utc8"
+      },
+      "phase2Start": {
+        "at": "2026-10-13T18:00",
+        "clock": "server"
+      },
+      "confidence": "official"
+    },
+    {
+      "id": "7.2",
+      "start": {
+        "at": "2026-11-04T06:00",
+        "clock": "utc8"
+      },
+      "specialProgram": {
+        "at": "2026-10-23T00:00",
+        "clock": "utc8"
+      },
+      "confidence": "projected"
+    },
+    {
+      "id": "7.3",
+      "start": {
+        "at": "2026-12-16T06:00",
+        "clock": "utc8"
+      },
+      "confidence": "projected"
+    },
+    {
+      "id": "7.4",
+      "start": {
+        "at": "2027-01-27T06:00",
+        "clock": "utc8"
+      },
+      "confidence": "projected"
+    },
+    {
+      "id": "7.5",
+      "start": {
+        "at": "2027-03-10T06:00",
+        "clock": "utc8"
+      },
+      "confidence": "projected"
+    }
+  ],
+  "banners": [
+    {
+      "id": "7.1-p1-char",
+      "versionId": "7.1",
+      "phase": 1,
+      "kind": "character",
+      "featured5": [
+        "Vesna",
+        "Vodyanitsa"
+      ],
+      "featured4": [
+        "Chongyun",
+        "Diona",
+        "Faruzan"
+      ],
+      "start": {
+        "at": "2026-09-23T06:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-10-13T17:59",
+        "clock": "server"
+      },
+      "confidence": "official"
+    },
+    {
+      "id": "7.1-p1-weapon",
+      "versionId": "7.1",
+      "phase": 1,
+      "kind": "weapon",
+      "featured5": [
+        "Beyond the Chrysalis",
+        "Hymn of the Maelstrom"
+      ],
+      "featured4": [],
+      "start": {
+        "at": "2026-09-23T06:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-10-13T17:59",
+        "clock": "server"
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "7.1-p2-char",
+      "versionId": "7.1",
+      "phase": 2,
+      "kind": "character",
+      "featured5": [
+        "Skirk",
+        "Escoffier"
+      ],
+      "featured4": [
+        "Candace",
+        "Mika",
+        "Dahlia"
+      ],
+      "start": {
+        "at": "2026-10-13T18:00",
+        "clock": "server"
+      },
+      "end": {
+        "at": "2026-11-04T06:00",
+        "clock": "utc8"
+      },
+      "confidence": "official"
+    },
+    {
+      "id": "7.1-p2-weapon",
+      "versionId": "7.1",
+      "phase": 2,
+      "kind": "weapon",
+      "featured5": [
+        "Azurelight",
+        "Symphonist of Scents"
+      ],
+      "featured4": [],
+      "start": {
+        "at": "2026-10-13T18:00",
+        "clock": "server"
+      },
+      "end": {
+        "at": "2026-11-04T06:00",
+        "clock": "utc8"
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "7.2-char",
+      "versionId": "7.2",
+      "phase": null,
+      "kind": "character",
+      "featured5": [
+        "Mitya",
+        "Valeriy"
+      ],
+      "featured4": [],
+      "start": {
+        "at": "2026-11-04T06:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-12-16T06:00",
+        "clock": "utc8"
+      },
+      "confidence": "announced"
+    },
+    {
+      "id": "7.3-char",
+      "versionId": "7.3",
+      "phase": null,
+      "kind": "character",
+      "featured5": [
+        "Danica"
+      ],
+      "featured4": [],
+      "start": {
+        "at": "2026-12-16T06:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2027-01-27T06:00",
+        "clock": "utc8"
+      },
+      "confidence": "leak"
+    }
+  ],
+  "events": [
+    {
+      "id": "7.1-resplendent-login",
+      "versionId": "7.1",
+      "title": "Resplendent Starlight: ежедневный вход (7 входов)",
+      "start": {
+        "at": "2026-10-01T04:00",
+        "clock": "server"
+      },
+      "end": {
+        "at": "2026-10-19T03:59",
+        "clock": "server"
+      },
+      "reward": {
+        "if": 10
+      },
+      "confidence": "official",
+      "tasks": [
+        {
+          "id": "d1",
+          "title": "Вход 1",
+          "reward": {
+            "if": 1
+          },
+          "done": false
+        },
+        {
+          "id": "d3",
+          "title": "Вход 3",
+          "reward": {
+            "if": 2
+          },
+          "done": false
+        },
+        {
+          "id": "d5",
+          "title": "Вход 5",
+          "reward": {
+            "if": 2
+          },
+          "done": false
+        },
+        {
+          "id": "d7",
+          "title": "Вход 7",
+          "reward": {
+            "if": 5
+          },
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "7.1-missive-of-grace",
+      "versionId": "7.1",
+      "title": "Missive of Grace: 4 письма по 400",
+      "start": {
+        "at": "2026-09-28T00:00",
+        "clock": "server"
+      },
+      "end": {
+        "at": "2026-10-31T00:00",
+        "clock": "server"
+      },
+      "reward": {
+        "primo": 1600
+      },
+      "confidence": "official",
+      "tasks": [
+        {
+          "id": "m1",
+          "title": "Письмо 28.09 (истекает ~28.10)",
+          "reward": {
+            "primo": 400
+          },
+          "done": false
+        },
+        {
+          "id": "m2",
+          "title": "Письмо 29.09 (истекает ~29.10)",
+          "reward": {
+            "primo": 400
+          },
+          "done": false
+        },
+        {
+          "id": "m3",
+          "title": "Письмо 30.09 (истекает ~30.10)",
+          "reward": {
+            "primo": 400
+          },
+          "done": false
+        },
+        {
+          "id": "m4",
+          "title": "Письмо 01.10 (истекает ~31.10)",
+          "reward": {
+            "primo": 400
+          },
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "7.1-maint-comp",
+      "versionId": "7.1",
+      "title": "Компенсация за обслуживание 7.1 (почта истекает ~23.10)",
+      "start": {
+        "at": "2026-09-23T11:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-10-23T11:00",
+        "clock": "utc8"
+      },
+      "reward": {
+        "primo": 300
+      },
+      "confidence": "official"
+    },
+    {
+      "id": "7.1-predictive-victory",
+      "versionId": "7.1",
+      "title": "Predictive Victory Dynamics",
+      "start": {
+        "at": "2026-10-12T10:00",
+        "clock": "server"
+      },
+      "end": null,
+      "reward": {
+        "primo": 420
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "7.1-snowball",
+      "versionId": "7.1",
+      "title": "Carefree Snowball Fight",
+      "start": {
+        "at": "2026-10-21T10:00",
+        "clock": "server"
+      },
+      "end": null,
+      "reward": {
+        "primo": 420
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "7.1-overflowing-favor",
+      "versionId": "7.1",
+      "title": "Overflowing Favor",
+      "start": {
+        "at": "2026-10-26T04:00",
+        "clock": "server"
+      },
+      "end": null,
+      "reward": {
+        "primo": null
+      },
+      "confidence": "unknown"
+    },
+    {
+      "id": "7.1-miliastra",
+      "versionId": "7.1",
+      "title": "Miliastra Wonderland: награды обновления",
+      "start": {
+        "at": "2026-09-23T11:00",
+        "clock": "utc8"
+      },
+      "end": null,
+      "reward": {
+        "primo": 80
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "7.1-archon-bonus",
+      "versionId": "7.1",
+      "title": "Бонус за архонт-квест гл. VII",
+      "start": {
+        "at": "2026-09-23T11:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-11-03T14:59",
+        "clock": "server"
+      },
+      "reward": {
+        "primo": null
+      },
+      "confidence": "official"
+    },
+    {
+      "id": "7.0-frostlands",
+      "versionId": "7.1",
+      "title": "The Godforsaken Frostlands: миссии исследования Снежной (7.0)",
+      "start": {
+        "at": "2026-08-12T11:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-11-03T14:59",
+        "clock": "server"
+      },
+      "reward": {
+        "primo": 400
+      },
+      "confidence": "official",
+      "tasks": [
+        {
+          "id": "m1",
+          "title": "Миссия исследования 1",
+          "reward": {
+            "primo": 100
+          },
+          "done": false
+        },
+        {
+          "id": "m2",
+          "title": "Миссия исследования 2",
+          "reward": {
+            "primo": 100
+          },
+          "done": false
+        },
+        {
+          "id": "m3",
+          "title": "Миссия исследования 3",
+          "reward": {
+            "primo": 100
+          },
+          "done": false
+        },
+        {
+          "id": "m4",
+          "title": "Миссия исследования 4",
+          "reward": {
+            "primo": 100
+          },
+          "done": false
+        }
+      ],
+      "note": "Итог 400 — official (объявление 21811). Разбивка 4 × 100 — со слов пользователя, в источниках не подтверждена; названия миссий уточнить в игре"
+    },
+    {
+      "id": "7.1-tabletop-troupe",
+      "versionId": "7.1",
+      "title": "Tabletop Troupe: 5★ на выбор",
+      "start": {
+        "at": "2026-09-23T11:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-11-03T14:59",
+        "clock": "server"
+      },
+      "reward": {},
+      "nonPrimoReward": "Тарталья / Нилу / Бай Чжу / Тиори / Клоринда / Вареса; нужен акт IV гл. VII",
+      "confidence": "official"
+    },
+    {
+      "id": "7.1-standard-selector",
+      "versionId": "7.1",
+      "title": "Across the Frozen Wilds: стандартный 5★ на выбор",
+      "start": {
+        "at": "2026-09-23T11:00",
+        "clock": "utc8"
+      },
+      "end": {
+        "at": "2026-11-03T14:59",
+        "clock": "server"
+      },
+      "reward": {},
+      "nonPrimoReward": "1 из 8 стандартных 5★",
+      "confidence": "official"
+    },
+    {
+      "id": "2027-lantern-rite",
+      "versionId": "7.4",
+      "title": "Праздник морских фонарей 2027",
+      "start": {
+        "at": "2027-01-27T11:00",
+        "clock": "utc8"
+      },
+      "end": null,
+      "reward": {
+        "if": 10,
+        "primo": null
+      },
+      "confidence": "leak"
+    }
+  ],
+  "rules": [
+    {
+      "id": "daily_commissions",
+      "reward": {
+        "primo": 60
+      },
+      "schedule": {
+        "kind": "daily"
+      },
+      "paid": false,
+      "claimLagHours": 14,
+      "confidence": "tally"
+    },
+    {
+      "id": "welkin",
+      "reward": {
+        "primo": 90
+      },
+      "schedule": {
+        "kind": "subscription",
+        "perPurchase": {
+          "crystal": 300
+        },
+        "days": 30,
+        "maxDays": 180
+      },
+      "paid": true,
+      "claimLagHours": 14,
+      "confidence": "tally"
+    },
+    {
+      "id": "bp_paid",
+      "reward": {
+        "primo": 680,
+        "if": 4
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 0,
+        "deadlineAnchor": "bpEnd"
+      },
+      "paid": true,
+      "claimLagHours": 720,
+      "confidence": "tally"
+    },
+    {
+      "id": "bp_free",
+      "reward": {
+        "af": 5
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 0,
+        "deadlineAnchor": "bpEnd"
+      },
+      "paid": false,
+      "claimLagHours": 720,
+      "confidence": "tally"
+    },
+    {
+      "id": "stardust_shop",
+      "reward": {
+        "if": 5,
+        "af": 5
+      },
+      "schedule": {
+        "kind": "monthly",
+        "day": 1
+      },
+      "paid": false,
+      "claimLagHours": 0,
+      "confidence": "tally",
+      "title": "Покупка круток в магазине Паймон: 5 IF + 5 AF в месяц"
+    },
+    {
+      "id": "abyss",
+      "reward": {
+        "primo": 800
+      },
+      "expected": {
+        "primo": 800
+      },
+      "expectedMin": {
+        "primo": 600
+      },
+      "schedule": {
+        "kind": "monthly",
+        "day": 16
+      },
+      "paid": false,
+      "claimLagHours": 72,
+      "confidence": "tally",
+      "tracker": "abyss"
+    },
+    {
+      "id": "theater",
+      "reward": {
+        "primo": 1000
+      },
+      "expected": {
+        "primo": 1000
+      },
+      "expectedMin": {
+        "primo": 800
+      },
+      "schedule": {
+        "kind": "monthly",
+        "day": 1
+      },
+      "paid": false,
+      "claimLagHours": 72,
+      "confidence": "tally",
+      "tracker": "theater"
+    },
+    {
+      "id": "stygian",
+      "reward": {
+        "primo": 450
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 7,
+        "windowDays": 35
+      },
+      "paid": false,
+      "claimLagHours": 72,
+      "confidence": "tally",
+      "tracker": "stygian"
+    },
+    {
+      "id": "maint_comp",
+      "reward": {
+        "primo": 300
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 0
+      },
+      "paid": false,
+      "claimLagHours": 6,
+      "confidence": "official",
+      "title": "Обновление: компенсация за обслуживание (300)"
+    },
+    {
+      "id": "fix_comp",
+      "reward": {
+        "primo": 300
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 0,
+        "windowDays": 3
+      },
+      "paid": false,
+      "claimLagHours": 6,
+      "confidence": "official",
+      "title": "Обновление: компенсация за исправления (300; вместе 600)"
+    },
+    {
+      "id": "stream_codes",
+      "reward": {
+        "primo": 300
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": -12,
+        "windowDays": 1
+      },
+      "paid": false,
+      "claimLagHours": 2,
+      "confidence": "tally",
+      "title": "Коды стрима разработчиков (300)"
+    },
+    {
+      "id": "trials",
+      "reward": {
+        "primo": 20
+      },
+      "schedule": {
+        "kind": "perPhase"
+      },
+      "paid": false,
+      "claimLagHours": 24,
+      "confidence": "tally"
+    },
+    {
+      "id": "hoyolab",
+      "reward": {
+        "primo": 60
+      },
+      "schedule": {
+        "kind": "monthly",
+        "day": 1
+      },
+      "paid": false,
+      "claimLagHours": 0,
+      "confidence": "tally",
+      "tracker": "hoyolab"
+    },
+    {
+      "id": "web_events",
+      "reward": {
+        "primo": 80
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 7,
+        "windowDays": 28
+      },
+      "paid": false,
+      "claimLagHours": 168,
+      "confidence": "tally"
+    },
+    {
+      "id": "events_tpl",
+      "reward": {
+        "primo": 1790
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 1,
+        "deadlineAnchor": "versionEndDeadline"
+      },
+      "paid": false,
+      "claimLagHours": 168,
+      "confidence": "projected"
+    },
+    {
+      "id": "new_content_tpl",
+      "reward": {
+        "primo": 800,
+        "if": 2
+      },
+      "schedule": {
+        "kind": "perVersion",
+        "anchor": "start",
+        "offsetDays": 0,
+        "deadlineAnchor": "versionEndDeadline"
+      },
+      "paid": false,
+      "claimLagHours": 168,
+      "confidence": "projected"
+    }
+  ],
+  "notes": [
+    "Регионы, уровни, общие источники и эндгейм — в primo_seed_regions.json (schemaVersion 2).",
+    "Сумма архонт-бонуса 7.1 и ивента Overflowing Favor не опубликована — null.",
+    "Если для Predictive Victory Dynamics / Snowball Fight известны даты окончания — дописать end.",
+    "Snezhnaya: регионы, сфера теней и квесты 7.0–7.1 — в primo_seed_regions.json."
+  ]
+}

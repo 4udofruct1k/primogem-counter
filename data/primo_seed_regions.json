@@ -1,0 +1,3451 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-10-19",
+  "source": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+  "chestTypes": [
+    {
+      "id": "common",
+      "name": "Обычный",
+      "values": {
+        "low": 0,
+        "high": 2
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "exquisite",
+      "name": "Богатый",
+      "values": {
+        "low": 2,
+        "high": 5
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "precious",
+      "name": "Драгоценный",
+      "values": {
+        "low": 5,
+        "high": 10
+      },
+      "confidence": "tally"
+    },
+    {
+      "id": "luxurious",
+      "name": "Роскошный",
+      "values": {
+        "low": 10,
+        "high": 10
+      },
+      "variants": [
+        10,
+        40
+      ],
+      "confidence": "user",
+      "note": "Зависит от сундука: бывают на 10 и на 40 (подтверждено пользователем). В редакторе у типа всегда две кнопки «+10» и «+40» во всех областях. Сундук усыпальницы учтён отдельно в категории «Усыпальницы»."
+    },
+    {
+      "id": "remarkable",
+      "name": "Удивительный",
+      "values": {
+        "low": 5,
+        "high": 5
+      },
+      "confidence": "tally",
+      "note": "На о. Цуруми — 0 (только чертежи)."
+    }
+  ],
+  "chestBracketNote": "low = низкоуровневые зоны Мондштадта и Ли Юэ; high = Драконий хребет, горы Буреносца, Каменный лес Гуюнь, Лиша, Разлом и все регионы кроме Мондштадта и Ли Юэ (genshin-guide chest guide).",
+  "levelSchedules": {
+    "statue_10": {
+      "title": "Статуя Семи (Мондштадт, Ли Юэ): 10 за уровень",
+      "levels": [
+        {
+          "level": 2,
+          "primo": 10
+        },
+        {
+          "level": 3,
+          "primo": 10
+        },
+        {
+          "level": 4,
+          "primo": 10
+        },
+        {
+          "level": 5,
+          "primo": 10
+        },
+        {
+          "level": 6,
+          "primo": 10
+        },
+        {
+          "level": 7,
+          "primo": 10
+        },
+        {
+          "level": 8,
+          "primo": 10
+        },
+        {
+          "level": 9,
+          "primo": 10
+        },
+        {
+          "level": 10,
+          "primo": 10
+        }
+      ],
+      "confidence": "tally",
+      "ref": "icy-veins: Mondstadt Statue of the Seven; для Ли Юэ сумма 90 совпадает с видео"
+    },
+    "statue_60": {
+      "title": "Статуя Семи (Инадзума, Сумеру, Фонтейн): 60 за уровень",
+      "levels": [
+        {
+          "level": 2,
+          "primo": 60,
+          "key": 1
+        },
+        {
+          "level": 3,
+          "primo": 60
+        },
+        {
+          "level": 4,
+          "primo": 60,
+          "key": 1
+        },
+        {
+          "level": 5,
+          "primo": 60
+        },
+        {
+          "level": 6,
+          "primo": 60,
+          "key": 1
+        },
+        {
+          "level": 7,
+          "primo": 60
+        },
+        {
+          "level": 8,
+          "primo": 60,
+          "key": 1
+        },
+        {
+          "level": 9,
+          "primo": 60,
+          "key": 1
+        },
+        {
+          "level": 10,
+          "primo": 60,
+          "key": 1
+        }
+      ],
+      "confidence": "tally",
+      "ref": "primagames: Fontaine Statue rewards; sportskeeda 2.1: Inazuma 60/уровень; ключи — по таблице Фонтейна"
+    },
+    "statue_100_natlan": {
+      "title": "Статуя Семи (Натлан): 100 за уровень + 3 AF",
+      "levels": [
+        {
+          "level": 2,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 3,
+          "primo": 100,
+          "af": 1
+        },
+        {
+          "level": 4,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 5,
+          "primo": 100,
+          "af": 1
+        },
+        {
+          "level": 6,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 7,
+          "primo": 100,
+          "af": 1
+        },
+        {
+          "level": 8,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 9,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 10,
+          "primo": 100,
+          "key": 1
+        }
+      ],
+      "confidence": "tally",
+      "ref": "icy-veins: Natlan Statue of the Seven"
+    },
+    "statue_100_nodkrai": {
+      "title": "Статуя Новолуния (Нод-Край): 100 за уровень + 3 AF",
+      "levels": [
+        {
+          "level": 2,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 3,
+          "primo": 100,
+          "af": 1
+        },
+        {
+          "level": 4,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 5,
+          "primo": 100,
+          "af": 1
+        },
+        {
+          "level": 6,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 7,
+          "primo": 100,
+          "af": 1
+        },
+        {
+          "level": 8,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 9,
+          "primo": 100
+        },
+        {
+          "level": 10,
+          "primo": 100
+        }
+      ],
+      "confidence": "tally",
+      "ref": "icy-veins: Nod-Krai Statue of the New Moon"
+    },
+    "frostbearing_12": {
+      "title": "Древо мерзлоты (12 уровней)",
+      "levels": [
+        {
+          "level": 1,
+          "af": 1
+        },
+        {
+          "level": 2,
+          "af": 1
+        },
+        {
+          "level": 3
+        },
+        {
+          "level": 4
+        },
+        {
+          "level": 5,
+          "af": 2
+        },
+        {
+          "level": 6,
+          "if": 2
+        },
+        {
+          "level": 7
+        },
+        {
+          "level": 8
+        },
+        {
+          "level": 9
+        },
+        {
+          "level": 10
+        },
+        {
+          "level": 11
+        },
+        {
+          "level": 12
+        }
+      ],
+      "confidence": "tally",
+      "ref": "thegamer: all Frostbearing Tree rewards"
+    },
+    "sakura_50": {
+      "title": "Благосклонность Священной сакуры (50 уровней)",
+      "levels": [
+        {
+          "level": 1
+        },
+        {
+          "level": 2,
+          "af": 2
+        },
+        {
+          "level": 3
+        },
+        {
+          "level": 4
+        },
+        {
+          "level": 5
+        },
+        {
+          "level": 6
+        },
+        {
+          "level": 7,
+          "af": 2
+        },
+        {
+          "level": 8,
+          "key": 1
+        },
+        {
+          "level": 9
+        },
+        {
+          "level": 10,
+          "if": 2
+        },
+        {
+          "level": 11
+        },
+        {
+          "level": 12,
+          "af": 2
+        },
+        {
+          "level": 13
+        },
+        {
+          "level": 14
+        },
+        {
+          "level": 15
+        },
+        {
+          "level": 16
+        },
+        {
+          "level": 17,
+          "af": 2
+        },
+        {
+          "level": 18,
+          "key": 1
+        },
+        {
+          "level": 19
+        },
+        {
+          "level": 20,
+          "if": 2
+        },
+        {
+          "level": 21
+        },
+        {
+          "level": 22,
+          "af": 2
+        },
+        {
+          "level": 23
+        },
+        {
+          "level": 24
+        },
+        {
+          "level": 25
+        },
+        {
+          "level": 26
+        },
+        {
+          "level": 27,
+          "af": 2
+        },
+        {
+          "level": 28,
+          "key": 1
+        },
+        {
+          "level": 29
+        },
+        {
+          "level": 30,
+          "if": 2
+        },
+        {
+          "level": 31
+        },
+        {
+          "level": 32,
+          "af": 2
+        },
+        {
+          "level": 33
+        },
+        {
+          "level": 34
+        },
+        {
+          "level": 35
+        },
+        {
+          "level": 36
+        },
+        {
+          "level": 37,
+          "af": 2
+        },
+        {
+          "level": 38,
+          "key": 1
+        },
+        {
+          "level": 39
+        },
+        {
+          "level": 40,
+          "if": 2
+        },
+        {
+          "level": 41
+        },
+        {
+          "level": 42,
+          "af": 2
+        },
+        {
+          "level": 43
+        },
+        {
+          "level": 44
+        },
+        {
+          "level": 45
+        },
+        {
+          "level": 46
+        },
+        {
+          "level": 47,
+          "af": 2
+        },
+        {
+          "level": 48
+        },
+        {
+          "level": 49
+        },
+        {
+          "level": 50,
+          "if": 2
+        }
+      ],
+      "confidence": "tally",
+      "ref": "wotpack.ru; sportskeeda 2.1 (ур. 21–50: 12 AF + 6 IF)"
+    },
+    "vanarana_50": {
+      "title": "Древо снов / Ванарана (50 уровней)",
+      "levels": [
+        {
+          "level": 1
+        },
+        {
+          "level": 2,
+          "af": 2
+        },
+        {
+          "level": 3
+        },
+        {
+          "level": 4
+        },
+        {
+          "level": 5
+        },
+        {
+          "level": 6
+        },
+        {
+          "level": 7,
+          "af": 2
+        },
+        {
+          "level": 8,
+          "key": 1
+        },
+        {
+          "level": 9
+        },
+        {
+          "level": 10,
+          "if": 2
+        },
+        {
+          "level": 11
+        },
+        {
+          "level": 12,
+          "af": 2
+        },
+        {
+          "level": 13
+        },
+        {
+          "level": 14
+        },
+        {
+          "level": 15
+        },
+        {
+          "level": 16
+        },
+        {
+          "level": 17,
+          "af": 2
+        },
+        {
+          "level": 18,
+          "key": 1
+        },
+        {
+          "level": 19
+        },
+        {
+          "level": 20,
+          "if": 2
+        },
+        {
+          "level": 21
+        },
+        {
+          "level": 22,
+          "af": 2
+        },
+        {
+          "level": 23
+        },
+        {
+          "level": 24
+        },
+        {
+          "level": 25
+        },
+        {
+          "level": 26
+        },
+        {
+          "level": 27,
+          "af": 2
+        },
+        {
+          "level": 28,
+          "key": 1
+        },
+        {
+          "level": 29
+        },
+        {
+          "level": 30,
+          "if": 2
+        },
+        {
+          "level": 31
+        },
+        {
+          "level": 32,
+          "af": 2
+        },
+        {
+          "level": 33
+        },
+        {
+          "level": 34
+        },
+        {
+          "level": 35
+        },
+        {
+          "level": 36
+        },
+        {
+          "level": 37,
+          "af": 2
+        },
+        {
+          "level": 38,
+          "key": 1
+        },
+        {
+          "level": 39
+        },
+        {
+          "level": 40,
+          "if": 2
+        },
+        {
+          "level": 41
+        },
+        {
+          "level": 42,
+          "af": 2
+        },
+        {
+          "level": 43
+        },
+        {
+          "level": 44
+        },
+        {
+          "level": 45
+        },
+        {
+          "level": 46
+        },
+        {
+          "level": 47,
+          "af": 2
+        },
+        {
+          "level": 48
+        },
+        {
+          "level": 49
+        },
+        {
+          "level": 50,
+          "if": 2
+        }
+      ],
+      "confidence": "tally",
+      "ref": "attackofthefanboy (ур. 1–20), sportskeeda (ур. 40–50); итог 20 AF + 10 IF совпадает с видео"
+    },
+    "lucine_50": {
+      "title": "Фонтан Люсины (50 уровней)",
+      "levels": [
+        {
+          "level": 1
+        },
+        {
+          "level": 2,
+          "af": 2
+        },
+        {
+          "level": 3
+        },
+        {
+          "level": 4
+        },
+        {
+          "level": 5
+        },
+        {
+          "level": 6
+        },
+        {
+          "level": 7,
+          "af": 2
+        },
+        {
+          "level": 8,
+          "key": 1
+        },
+        {
+          "level": 9
+        },
+        {
+          "level": 10,
+          "if": 2
+        },
+        {
+          "level": 11
+        },
+        {
+          "level": 12,
+          "af": 2
+        },
+        {
+          "level": 13
+        },
+        {
+          "level": 14
+        },
+        {
+          "level": 15
+        },
+        {
+          "level": 16
+        },
+        {
+          "level": 17,
+          "af": 2
+        },
+        {
+          "level": 18,
+          "key": 1
+        },
+        {
+          "level": 19
+        },
+        {
+          "level": 20,
+          "if": 2
+        },
+        {
+          "level": 21
+        },
+        {
+          "level": 22,
+          "af": 2
+        },
+        {
+          "level": 23
+        },
+        {
+          "level": 24
+        },
+        {
+          "level": 25
+        },
+        {
+          "level": 26
+        },
+        {
+          "level": 27,
+          "af": 2
+        },
+        {
+          "level": 28,
+          "key": 1
+        },
+        {
+          "level": 29
+        },
+        {
+          "level": 30,
+          "if": 2
+        },
+        {
+          "level": 31
+        },
+        {
+          "level": 32,
+          "af": 2
+        },
+        {
+          "level": 33
+        },
+        {
+          "level": 34
+        },
+        {
+          "level": 35
+        },
+        {
+          "level": 36
+        },
+        {
+          "level": 37,
+          "af": 2
+        },
+        {
+          "level": 38,
+          "key": 1
+        },
+        {
+          "level": 39
+        },
+        {
+          "level": 40,
+          "if": 2
+        },
+        {
+          "level": 41
+        },
+        {
+          "level": 42,
+          "af": 2
+        },
+        {
+          "level": 43
+        },
+        {
+          "level": 44
+        },
+        {
+          "level": 45
+        },
+        {
+          "level": 46
+        },
+        {
+          "level": 47,
+          "af": 2
+        },
+        {
+          "level": 48
+        },
+        {
+          "level": 49
+        },
+        {
+          "level": 50,
+          "if": 2
+        }
+      ],
+      "confidence": "tally",
+      "ref": "sportskeeda: Fountain of Lucine rewards"
+    },
+    "lumenstone_10": {
+      "title": "Адъювант светящегося камня (10 рангов)",
+      "levels": [
+        {
+          "level": 1
+        },
+        {
+          "level": 2,
+          "af": 2
+        },
+        {
+          "level": 3
+        },
+        {
+          "level": 4
+        },
+        {
+          "level": 5
+        },
+        {
+          "level": 6,
+          "af": 2
+        },
+        {
+          "level": 7
+        },
+        {
+          "level": 8,
+          "if": 2
+        },
+        {
+          "level": 9
+        },
+        {
+          "level": 10
+        }
+      ],
+      "confidence": "tally",
+      "ref": "pockettactics: Lumenstone Adjuvant"
+    },
+    "rainjade_10": {
+      "title": "Заветный нефрит / Rainjade (10 уровней)",
+      "levels": [
+        {
+          "level": 1,
+          "af": 2
+        },
+        {
+          "level": 2
+        },
+        {
+          "level": 3
+        },
+        {
+          "level": 4
+        },
+        {
+          "level": 5,
+          "af": 2
+        },
+        {
+          "level": 6
+        },
+        {
+          "level": 7,
+          "if": 2
+        },
+        {
+          "level": 8
+        },
+        {
+          "level": 9
+        },
+        {
+          "level": 10
+        }
+      ],
+      "confidence": "tally",
+      "ref": "sportskeeda: Votive Rainjade guide"
+    },
+    "amrita_6": {
+      "title": "Дар Амриты / Оазис Вурукаша (6 наборов)",
+      "levels": [
+        {
+          "level": 1,
+          "primo": 100
+        },
+        {
+          "level": 2,
+          "primo": 100
+        },
+        {
+          "level": 3,
+          "primo": 100
+        },
+        {
+          "level": 4,
+          "primo": 100
+        },
+        {
+          "level": 5,
+          "primo": 100
+        },
+        {
+          "level": 6,
+          "primo": 100
+        }
+      ],
+      "confidence": "tally",
+      "ref": "sportskeeda 3.6 (утечка; итог 600 совпадает с видео)"
+    },
+    "tona_50": {
+      "title": "Пламя Тоны (50 уровней)",
+      "levels": [
+        {
+          "level": 1,
+          "primo": 50
+        },
+        {
+          "level": 2,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 3,
+          "primo": 50
+        },
+        {
+          "level": 4,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 5,
+          "primo": 50
+        },
+        {
+          "level": 6,
+          "primo": 50
+        },
+        {
+          "level": 7,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 8,
+          "primo": 50,
+          "key": 1
+        },
+        {
+          "level": 9,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 10,
+          "primo": 50
+        },
+        {
+          "level": 11,
+          "primo": 50
+        },
+        {
+          "level": 12,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 13,
+          "primo": 50
+        },
+        {
+          "level": 14,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 15,
+          "primo": 50
+        },
+        {
+          "level": 16,
+          "primo": 50
+        },
+        {
+          "level": 17,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 18,
+          "primo": 50,
+          "key": 1
+        },
+        {
+          "level": 19,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 20,
+          "primo": 50
+        },
+        {
+          "level": 21,
+          "primo": 50
+        },
+        {
+          "level": 22,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 23,
+          "primo": 50
+        },
+        {
+          "level": 24,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 25,
+          "primo": 50
+        },
+        {
+          "level": 26,
+          "primo": 50
+        },
+        {
+          "level": 27,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 28,
+          "primo": 50,
+          "key": 1
+        },
+        {
+          "level": 29,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 30,
+          "primo": 50
+        },
+        {
+          "level": 31,
+          "primo": 50
+        },
+        {
+          "level": 32,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 33,
+          "primo": 50
+        },
+        {
+          "level": 34,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 35,
+          "primo": 50
+        },
+        {
+          "level": 36,
+          "primo": 50
+        },
+        {
+          "level": 37,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 38,
+          "primo": 50,
+          "key": 1
+        },
+        {
+          "level": 39,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 40,
+          "primo": 50
+        },
+        {
+          "level": 41,
+          "primo": 50
+        },
+        {
+          "level": 42,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 43,
+          "primo": 50
+        },
+        {
+          "level": 44,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 45,
+          "primo": 50
+        },
+        {
+          "level": 46,
+          "primo": 50
+        },
+        {
+          "level": 47,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 48,
+          "primo": 50
+        },
+        {
+          "level": 49,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 50,
+          "primo": 50
+        }
+      ],
+      "confidence": "tally",
+      "ref": "icy-veins: Tona's Flame"
+    },
+    "meeting_point_5": {
+      "title": "Место встреч Нод-Края (5 уровней, на одну точку)",
+      "levels": [
+        {
+          "level": 1,
+          "primo": 50
+        },
+        {
+          "level": 2,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 3,
+          "primo": 50,
+          "key": 1
+        },
+        {
+          "level": 4,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 5,
+          "primo": 50
+        }
+      ],
+      "confidence": "tally",
+      "ref": "bittopup: Nod-Krai Meeting Points (ключ на ур. 3 у 2 из 3 первых точек)"
+    },
+    "statue_100_snezh": {
+      "title": "Статуя Семи (Снежная): 100 за уровень + 1 AF",
+      "levels": [
+        {
+          "level": 2,
+          "primo": 100,
+          "af": 1
+        },
+        {
+          "level": 3,
+          "primo": 100
+        },
+        {
+          "level": 4,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 5,
+          "primo": 100
+        },
+        {
+          "level": 6,
+          "primo": 100,
+          "key": 1
+        },
+        {
+          "level": 7,
+          "primo": 100
+        },
+        {
+          "level": 8,
+          "primo": 100
+        },
+        {
+          "level": 9,
+          "primo": 100
+        },
+        {
+          "level": 10,
+          "primo": 100
+        }
+      ],
+      "confidence": "tally",
+      "ref": "icy-veins: Snezhnaya Statue of the Seven (один источник)"
+    },
+    "meeting_point_5_snezh": {
+      "title": "Место встреч Снежной (5 уровней, на одну точку)",
+      "levels": [
+        {
+          "level": 1,
+          "primo": 50
+        },
+        {
+          "level": 2,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 3,
+          "primo": 50,
+          "key": 1
+        },
+        {
+          "level": 4,
+          "primo": 50,
+          "af": 1
+        },
+        {
+          "level": 5,
+          "primo": 50
+        }
+      ],
+      "confidence": "tally",
+      "ref": "icy-veins: Snezhnaya Meeting Point; topuplive: 3 × 250; ключ на ур. 3 — как в Нод-Крае (genshin-builds: ключи от статуи и мест встреч)"
+    },
+    "shadow_analyzer_5": {
+      "title": "Сфера теней: анализатор (5 уровней; порог тенекрылых капель 3 / 6 / 10 / 15 / 21, накопительно)",
+      "levels": [
+        {
+          "level": 1,
+          "req": 3
+        },
+        {
+          "level": 2,
+          "req": 6
+        },
+        {
+          "level": 3,
+          "req": 10
+        },
+        {
+          "level": 4,
+          "req": 15
+        },
+        {
+          "level": 5,
+          "af": 1,
+          "req": 21
+        }
+      ],
+      "confidence": "tally",
+      "ref": "allthings.how, showgamer: Shadow Wingdrop; примогемов нет, на ур. 5 — 1 AF"
+    },
+    "crucible_4": {
+      "title": "Горнило безысходности: пороги очков одного испытания (50 000 / 200 000 / 400 000 / 600 000)",
+      "levels": [
+        {
+          "level": 1,
+          "primo": 15,
+          "req": 50000
+        },
+        {
+          "level": 2,
+          "primo": 15,
+          "req": 200000
+        },
+        {
+          "level": 3,
+          "req": 400000
+        },
+        {
+          "level": 4,
+          "req": 600000
+        }
+      ],
+      "confidence": "tally",
+      "ref": "showgamer: Crucible of Despair (один источник); 400k и 600k — смола, масло, руда, без примогемов"
+    }
+  },
+  "regions": [
+    {
+      "id": "mondstadt",
+      "name": "Мондштадт",
+      "videoChapter": "08:34",
+      "areas": [
+        {
+          "id": "mondstadt_main",
+          "name": "Мондштадт",
+          "chestBracket": "mixed",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 160
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 175
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 35,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 90
+              },
+              "editor": "level",
+              "schedule": "statue_10",
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 400
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 10,
+              "confidence": "video",
+              "note": "40 за усыпальницу; число — game8 / ключи статуи и подношений"
+            },
+            {
+              "kind": "domains",
+              "title": "Данжи (первое прохождение)",
+              "total": {
+                "primo": 160
+              },
+              "editor": "checklist",
+              "unit": {
+                "primo": 40
+              },
+              "count": 4,
+              "confidence": "video",
+              "note": "40 за данж — выведено: Мондштадт 160 / 4 данжа, Ли Юэ 160 / 4 прохождения. Названия — англ. (progameguides), RU-локализацию не сверял",
+              "items": [
+                "Temple of the Lion",
+                "Temple of the Wolf",
+                "Temple of the Falcon",
+                "Eagle's Gate"
+              ]
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 787
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+              "chestCounts": {
+                "common": 292,
+                "exquisite": 189,
+                "precious": 19,
+                "luxurious": 20,
+                "total": 520,
+                "asOf": "3.4",
+                "source": "Chest Totals (Google Sheets, сообщество), данные на 3.4 — справочно, позже сундуки добавлялись"
+              }
+            }
+          ],
+          "videoTotal": {
+            "primo": 1772
+          },
+          "computedTotal": {
+            "primo": 1772
+          }
+        },
+        {
+          "id": "mondstadt_windpeak",
+          "name": "Пик ветров",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 70
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 14,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 110
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 265
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            }
+          ],
+          "videoTotal": {
+            "primo": 445
+          },
+          "note": "Название как в видео; версию добавления уточнить",
+          "computedTotal": {
+            "primo": 445
+          }
+        },
+        {
+          "id": "temple_of_space",
+          "name": "Храм пространства",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 190
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 85
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 17,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "offering",
+              "title": "Подношения",
+              "total": {
+                "primo": 500,
+                "af": 4
+              },
+              "editor": "amount",
+              "schedule": null,
+              "confidence": "video",
+              "note": "Поуровневая разбивка не найдена — ввод суммой"
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 832
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            }
+          ],
+          "addedIn": "6.5 (Luna VI)",
+          "note": "Итога в видео на скрине нет — считается суммой строк",
+          "computedTotal": {
+            "primo": 1607,
+            "af": 4
+          }
+        },
+        {
+          "id": "dragonspine",
+          "name": "Драконий хребет",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 270
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 65
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 13,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "offering",
+              "title": "Древо мерзлоты",
+              "total": {
+                "af": 4,
+                "if": 2
+              },
+              "editor": "level",
+              "schedule": "frostbearing_12",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 899
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+              "chestCounts": {
+                "common": 86,
+                "exquisite": 100,
+                "precious": 37,
+                "luxurious": 11,
+                "total": 234,
+                "asOf": "3.4",
+                "source": "Chest Totals (Google Sheets, сообщество), данные на 3.4 — справочно, позже сундуки добавлялись"
+              }
+            }
+          ],
+          "note": "Итога на скрине нет — сумма строк",
+          "computedTotal": {
+            "primo": 1234,
+            "af": 4,
+            "if": 2
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 5058,
+        "af": 8,
+        "if": 2
+      }
+    },
+    {
+      "id": "liyue",
+      "name": "Ли Юэ",
+      "videoChapter": "12:44",
+      "areas": [
+        {
+          "id": "liyue_main",
+          "name": "Ли Юэ (вкл. Долину Чэньюй)",
+          "chestBracket": "mixed",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 1020
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 430
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 86,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 90
+              },
+              "editor": "level",
+              "schedule": "statue_10",
+              "confidence": "video",
+              "note": "Структура как у Мондштадта (сумма 90 совпадает)"
+            },
+            {
+              "kind": "domains",
+              "title": "Данжи (первое прохождение)",
+              "total": {
+                "primo": 160
+              },
+              "editor": "checklist",
+              "unit": {
+                "primo": 40
+              },
+              "count": 4,
+              "confidence": "video",
+              "note": "40 за данж — выведено: Мондштадт 160 / 4 данжа, Ли Юэ 160 / 4 прохождения. Названия — англ. (progameguides), RU-локализацию не сверял",
+              "items": [
+                "Hidden Palace of Guizang Formula: Voyage to the Sanguine Sky",
+                "Hidden Palace of Guizang Formula: Travels of the Moonlit Venturer",
+                "Domain of Forsaken Ruins",
+                "Domain of the Wayward Path"
+              ]
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 400
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 10,
+              "confidence": "video",
+              "note": "40 за усыпальницу; число — game8 / ключи статуи и подношений"
+            },
+            {
+              "kind": "offering",
+              "title": "Заветный нефрит (Долина Чэньюй)",
+              "total": {
+                "af": 4,
+                "if": 2
+              },
+              "editor": "level",
+              "schedule": "rainjade_10",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 4152
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+              "chestCounts": {
+                "common": 474,
+                "exquisite": 518,
+                "precious": 122,
+                "luxurious": 34,
+                "total": 1145,
+                "asOf": "3.4",
+                "source": "Chest Totals (Google Sheets, сообщество), данные на 3.4 — справочно, позже сундуки добавлялись"
+              }
+            }
+          ],
+          "videoTotal": {
+            "primo": 6252,
+            "af": 4,
+            "if": 2
+          },
+          "computedTotal": {
+            "primo": 6252,
+            "af": 4,
+            "if": 2
+          }
+        },
+        {
+          "id": "chasm",
+          "name": "Разлом",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 410
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 115
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 23,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "offering",
+              "title": "Адъювант",
+              "total": {
+                "af": 4,
+                "if": 2
+              },
+              "editor": "level",
+              "schedule": "lumenstone_10",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 940
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+              "chestCounts": {
+                "common": 145,
+                "exquisite": 69,
+                "precious": 25,
+                "luxurious": 9,
+                "total": 248,
+                "asOf": "3.4",
+                "source": "Chest Totals (Google Sheets, сообщество), данные на 3.4 — справочно, позже сундуки добавлялись"
+              }
+            }
+          ],
+          "note": "Итога на скрине нет — сумма строк",
+          "computedTotal": {
+            "primo": 1465,
+            "af": 4,
+            "if": 2
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 7717,
+        "af": 8,
+        "if": 4
+      }
+    },
+    {
+      "id": "inazuma",
+      "name": "Инадзума",
+      "videoChapter": "14:37",
+      "areas": [
+        {
+          "id": "inazuma_main",
+          "name": "Инадзума",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 1935
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 320
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 64,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 540
+              },
+              "editor": "level",
+              "schedule": "statue_60",
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "domains",
+              "title": "Данжи (первое прохождение)",
+              "total": {
+                "primo": 200
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 5,
+              "confidence": "video",
+              "note": "40 за данж (выведено) → 5 данжей"
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 400
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 10,
+              "confidence": "video",
+              "note": "40 за усыпальницу; число — game8 / ключи статуи и подношений"
+            },
+            {
+              "kind": "offering",
+              "title": "Священная сакура",
+              "total": {
+                "af": 20,
+                "if": 10
+              },
+              "editor": "level",
+              "schedule": "sakura_50",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 2281
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+              "chestCounts": {
+                "common": 389,
+                "exquisite": 190,
+                "precious": 66,
+                "luxurious": 40,
+                "remarkable": 46,
+                "total": 685,
+                "asOf": "3.4",
+                "source": "Chest Totals (Google Sheets, сообщество), данные на 3.4 — справочно, позже сундуки добавлялись; сумма Series I + II + Цуруми"
+              }
+            }
+          ],
+          "note": "Итога на скрине нет — сумма строк",
+          "computedTotal": {
+            "primo": 5676,
+            "af": 20,
+            "if": 10
+          }
+        },
+        {
+          "id": "enkanomiya",
+          "name": "Энканомия",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 210
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 120
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 24,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 764
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+              "chestCounts": {
+                "common": 110,
+                "exquisite": 50,
+                "precious": 18,
+                "luxurious": 7,
+                "total": 185,
+                "asOf": "3.4",
+                "source": "Chest Totals (Google Sheets, сообщество), данные на 3.4 — справочно, позже сундуки добавлялись"
+              }
+            }
+          ],
+          "videoTotal": {
+            "primo": 1094
+          },
+          "computedTotal": {
+            "primo": 1094
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 6770,
+        "af": 20,
+        "if": 10
+      }
+    },
+    {
+      "id": "sumeru",
+      "name": "Сумеру",
+      "videoChapter": "16:29",
+      "areas": [
+        {
+          "id": "sumeru_main",
+          "name": "Сумеру",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 3480
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 710
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 142,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "domains",
+              "title": "Данжи (первое прохождение)",
+              "total": {
+                "primo": 480
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 12,
+              "confidence": "video",
+              "note": "40 за данж (выведено) → 12 данжей"
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 400
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 10,
+              "confidence": "video",
+              "note": "40 за усыпальницу; число — game8 / ключи статуи и подношений"
+            },
+            {
+              "kind": "offering",
+              "title": "Оазис (Дар Амриты)",
+              "total": {
+                "primo": 600
+              },
+              "editor": "level",
+              "schedule": "amrita_6",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "offering",
+              "title": "Древо снов (в видео — «Луковица»)",
+              "total": {
+                "af": 20,
+                "if": 10
+              },
+              "editor": "level",
+              "schedule": "vanarana_50",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 6611
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026",
+              "chestCounts": {
+                "common": 704,
+                "exquisite": 262,
+                "precious": 101,
+                "luxurious": 45,
+                "remarkable": 100,
+                "total": 1172,
+                "asOf": "3.4",
+                "source": "Chest Totals (Google Sheets, сообщество), данные на 3.4 — справочно, позже сундуки добавлялись; лес + пустыня I + II, без 3.6+"
+              }
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 540
+              },
+              "editor": "level",
+              "schedule": "statue_60",
+              "confidence": "derived",
+              "note": "В видео строки нет, но итог 12 821 = сумма строк + 540 = 9 уровней × 60"
+            }
+          ],
+          "videoTotal": {
+            "primo": 12821,
+            "af": 20,
+            "if": 10
+          },
+          "computedTotal": {
+            "primo": 12821,
+            "af": 20,
+            "if": 10
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 12821,
+        "af": 20,
+        "if": 10
+      }
+    },
+    {
+      "id": "fontaine",
+      "name": "Фонтейн",
+      "videoChapter": "18:07",
+      "areas": [
+        {
+          "id": "fontaine_main",
+          "name": "Фонтейн",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 2450
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 495
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 99,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 540
+              },
+              "editor": "level",
+              "schedule": "statue_60",
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 320
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 8,
+              "confidence": "video",
+              "note": "40 × 8; ещё 2 ключа Фонтейна уходят в Море древности"
+            },
+            {
+              "kind": "offering",
+              "title": "Фонтан Люсины",
+              "total": {
+                "af": 20,
+                "if": 10
+              },
+              "editor": "level",
+              "schedule": "lucine_50",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 4493
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            }
+          ],
+          "videoTotal": {
+            "primo": 8298,
+            "af": 20,
+            "if": 10
+          },
+          "computedTotal": {
+            "primo": 8298,
+            "af": 20,
+            "if": 10
+          }
+        },
+        {
+          "id": "sea_of_bygone",
+          "name": "Море древности",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 210
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 125
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 25,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 80
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 40
+              },
+              "count": 2,
+              "confidence": "video",
+              "note": "40 × 2"
+            },
+            {
+              "kind": "offering",
+              "title": "Шкатулка",
+              "total": {
+                "primo": 120
+              },
+              "editor": "amount",
+              "schedule": null,
+              "confidence": "video",
+              "note": "Поуровневая разбивка не найдена — ввод суммой"
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки (в видео — «Собирательство»)",
+              "total": {
+                "primo": 824
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            }
+          ],
+          "videoTotal": {
+            "primo": 1359
+          },
+          "computedTotal": {
+            "primo": 1359
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 9657,
+        "af": 20,
+        "if": 10
+      }
+    },
+    {
+      "id": "natlan",
+      "name": "Натлан",
+      "videoChapter": "19:50",
+      "areas": [
+        {
+          "id": "natlan_main",
+          "name": "Натлан",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 2150
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 770
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 154,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 900,
+                "af": 3
+              },
+              "editor": "level",
+              "schedule": "statue_100_natlan",
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 800
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 80
+              },
+              "count": 10,
+              "confidence": "video",
+              "note": "80 за усыпальницу — выведено: итог видео / число ключей (Натлан 800/10, Нод-Край 560/7); ключи: статуя 6 + Пламя Тоны 4"
+            },
+            {
+              "kind": "offering",
+              "title": "Пламя Тоны",
+              "total": {
+                "primo": 2500,
+                "af": 20
+              },
+              "editor": "level",
+              "schedule": "tona_50",
+              "multiplier": 1,
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": {
+                "primo": 4903
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            }
+          ],
+          "videoTotal": {
+            "primo": 12023,
+            "af": 23
+          },
+          "computedTotal": {
+            "primo": 12023,
+            "af": 23
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 12023,
+        "af": 23
+      }
+    },
+    {
+      "id": "nodkrai",
+      "name": "Нод-Край",
+      "videoChapter": "21:28",
+      "areas": [
+        {
+          "id": "nodkrai_main",
+          "name": "Нод-Край",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 1060
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 470
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 94,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 900,
+                "af": 3
+              },
+              "editor": "level",
+              "schedule": "statue_100_nodkrai",
+              "confidence": "video",
+              "note": null
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 560
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 80
+              },
+              "count": 7,
+              "confidence": "video",
+              "note": "80 за усыпальницу — выведено: итог видео / число ключей (Натлан 800/10, Нод-Край 560/7); ключи: статуя 4 + места встреч 3"
+            },
+            {
+              "kind": "offering",
+              "title": "Места встреч",
+              "total": {
+                "primo": 1500,
+                "af": 12
+              },
+              "editor": "level",
+              "schedule": "meeting_point_5",
+              "multiplier": 6,
+              "confidence": "derived",
+              "note": "1500 + 12 AF = 6 точек × (250 + 2 AF); на 6.0 было 3 точки"
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": {
+                "primo": 2544
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            }
+          ],
+          "note": "Итога на скрине нет — сумма строк",
+          "computedTotal": {
+            "primo": 7034,
+            "af": 15
+          }
+        },
+        {
+          "id": "nodkrai_rainbow_moon",
+          "name": "Радужная луна",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты (мировые задания)",
+              "total": {
+                "primo": 170
+              },
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 210
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 42,
+              "countDerived": true,
+              "confidence": "video",
+              "note": "5 за точку (sportskeeda); число точек = итог / 5"
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 240
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 80
+              },
+              "count": 3,
+              "confidence": "video",
+              "note": "80 за усыпальницу — выведено: итог видео / число ключей (Натлан 800/10, Нод-Край 560/7)"
+            },
+            {
+              "kind": "offering",
+              "title": "Места встреч",
+              "total": {
+                "primo": 500,
+                "af": 4
+              },
+              "editor": "level",
+              "schedule": "meeting_point_5",
+              "multiplier": 2,
+              "confidence": "derived",
+              "note": "500 + 4 AF = 2 точки × (250 + 2 AF) — выведено"
+            },
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": {
+                "primo": 1038
+              },
+              "editor": "chests",
+              "confidence": "video",
+              "ref": "Miron MinMax, «Сколько примогемов в игре? Контент на 100% | 2026», 29.07.2026"
+            }
+          ],
+          "note": "Подобласть Нод-Края (в видео — иконка с орбитой, без подписи); название — со слов пользователя",
+          "computedTotal": {
+            "primo": 2158,
+            "af": 4
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 9192,
+        "af": 19
+      }
+    },
+    {
+      "id": "snezhnaya",
+      "name": "Снежная",
+      "videoChapter": null,
+      "areas": [
+        {
+          "id": "snezhnaya_general",
+          "name": "Снежная: общее",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "archon_quests",
+              "title": "Архонт-квест гл. VII, акты I–II (7.0)",
+              "total": {
+                "primo": 90,
+                "if": 2
+              },
+              "editor": "amount",
+              "quick": [
+                30,
+                60
+              ],
+              "confidence": "leak",
+              "note": "Оценка до выхода (topuplive): 90 + 2 IF за обычное прохождение. Отдельный бонус 560 за прохождение в окне 7.0 — истёк"
+            },
+            {
+              "kind": "archon_quests",
+              "title": "Архонт- и сюжетные квесты 7.1 (акты III–IV, «White Night», «Like a Dream Upon Waking»)",
+              "total": {
+                "primo": 920,
+                "if": 2
+              },
+              "editor": "amount",
+              "quick": [
+                30,
+                60,
+                100
+              ],
+              "confidence": "tally",
+              "ref": "gamsgo: Genshin 7.1 Primogem Count",
+              "note": "Включает ачивки квестов. Бонус за прохождение до 03.11 14:59 — отдельный ивент, сумма не опубликована"
+            },
+            {
+              "kind": "side_quests",
+              "title": "Сайд-квесты 7.0 (26 заданий, вкл. скрытые)",
+              "total": null,
+              "editor": "amount",
+              "quick": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "confidence": "unknown",
+              "note": "Список — enjoygm.com; суммы по заданиям не найдены. Оценки до выхода: ~420 (wotpack) … ~600 (topuplive)"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 305
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 61,
+              "confidence": "tally",
+              "note": "61 точка на 7.1 (timesaver), вкл. новую у Tidesong Cavern в 7.1; 5 за точку"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 900,
+                "af": 1
+              },
+              "editor": "level",
+              "schedule": "statue_100_snezh",
+              "confidence": "tally",
+              "note": "5 статуй, общий уровень (icy-veins). Сейчас доступно 140 криокулов из 271 → максимум ур. 6 (125 криокулов); остальные ожидаются в 7.2 (wotpack). Названия подобластей — по landofgames; White Birch Snowgrave — англ., RU-название не нашёл",
+              "maxLevelNow": 6,
+              "maxLevelNowNote": "140 / 271 криокулов на 7.1",
+              "totalNow": {
+                "primo": 500,
+                "af": 1
+              }
+            },
+            {
+              "kind": "shrines",
+              "title": "Усыпальницы (Shrines of Depths)",
+              "total": {
+                "primo": 320
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 80
+              },
+              "count": 4,
+              "confidence": "derived",
+              "note": "Как в Нод-Крае: 80 за штуку, ключи от статуи (ур. 4 и 6) и мест встреч (ур. 3). 4 усыпальницы (timesaver, genshin-builds). Все 4 ключа доступны уже сейчас"
+            },
+            {
+              "kind": "offering",
+              "title": "Места встреч",
+              "total": {
+                "primo": 750,
+                "af": 6
+              },
+              "editor": "level",
+              "schedule": "meeting_point_5_snezh",
+              "multiplier": 3,
+              "confidence": "tally",
+              "note": "Подношение криопечатей, как в Нод-Крае: 3 точки (Tidesong Cavern, Huntsman's Cabin, Korolevskiy Theater), 30 печатей за уровень, 250 + 2 AF каждая; уровни требуют 10/30/50/70/90% исследования подобласти"
+            },
+            {
+              "kind": "other",
+              "title": "Местные легенды",
+              "total": {
+                "primo": 180
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 60
+              },
+              "count": 3,
+              "confidence": "leak",
+              "note": "Оценка до выхода (topuplive): 3 × 60"
+            },
+            {
+              "kind": "shadow_realm",
+              "title": "Сфера теней: анализатор",
+              "total": {
+                "af": 1
+              },
+              "editor": "level",
+              "schedule": "shadow_analyzer_5",
+              "confidence": "tally",
+              "note": "Тенекрылые капли: 58 всего (allthings, вкл. квестовые зоны) или 30 в пяти разломах (showgamer). Уровень анализатора = порог собранных капель"
+            },
+            {
+              "kind": "shadow_realm",
+              "title": "Сфера теней: разломы (зачистка)",
+              "total": {
+                "primo": 100
+              },
+              "editor": "checklist",
+              "unit": {
+                "primo": 20
+              },
+              "count": 5,
+              "items": [
+                "Ледозаготовительная площадка (Долина огненных перьев / Вечная мерзлота)",
+                "Объект (к северу от Глупова)",
+                "Ремонтный центр (под ж/д у «Ранковой зори»)",
+                "Руины (Светлоледовка, Морозный пик)",
+                "Плавучая база (Тундра волкодлаков)"
+              ],
+              "confidence": "tally",
+              "note": "5 разломов × 20 примогемов за полную зачистку (landofgames); 2 зачищенных открывают «Горнило безысходности»"
+            },
+            {
+              "kind": "offering",
+              "title": "Горнило безысходности (3 испытания)",
+              "total": {
+                "primo": 90
+              },
+              "editor": "level",
+              "schedule": "crucible_4",
+              "multiplier": 3,
+              "confidence": "tally",
+              "note": "Испытания: «Прорыв строя», «Ярость ближнего боя», «Леденящий ураган» (после «Дворец иль царская гробница»). По 15 за 50 000 и 200 000 очков → 90 всего. Открывается в тире поезда после 2 разломов и задания «Тир и Глубинная сфера теней»"
+            },
+            {
+              "kind": "shadow_realm",
+              "title": "Сфера теней: сокровищницы",
+              "total": null,
+              "editor": "checklist",
+              "items": [
+                "Everfrozen Earth (Morepesok)",
+                "Fellfrost Peak (Svetloledovka)",
+                "White Birch Snowgrave (после «On One Side a Palace, On the Other a Tomb»)"
+              ],
+              "confidence": "unknown",
+              "note": "3 сокровищницы (gamewith); открываются 3 Remnant Incense Guide; внутри 5★ артефакты, примогемы не найдены"
+            }
+          ],
+          "addedIn": "7.0",
+          "computedTotal": {
+            "primo": 3655,
+            "if": 4,
+            "af": 8
+          },
+          "availableNowTotal": {
+            "primo": 3255,
+            "if": 4,
+            "af": 8
+          }
+        },
+        {
+          "id": "volkodlak_tundra",
+          "name": "Тундра волкодлаков",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": null,
+              "editor": "chests",
+              "confidence": "unknown",
+              "ref": null,
+              "chestCounts": {
+                "total": 66,
+                "asOf": "7.1",
+                "source": "icy-veins (вкл. квестовые и испытания)"
+              },
+              "note": "По типам: wotpack даёт 13 / 18 / 6 + 6 удивительных = 43 — расходится с 66"
+            }
+          ],
+          "addedIn": "7.0",
+          "computedTotal": {}
+        },
+        {
+          "id": "everfrozen_earth",
+          "name": "Вечная мерзлота",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": null,
+              "editor": "chests",
+              "confidence": "unknown",
+              "ref": null,
+              "chestCounts": {
+                "total": 98,
+                "remarkable": 3,
+                "asOf": "7.1",
+                "source": "icy-veins"
+              }
+            }
+          ],
+          "addedIn": "7.0",
+          "computedTotal": {}
+        },
+        {
+          "id": "fellfrost_peak",
+          "name": "Морозный пик",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": null,
+              "editor": "chests",
+              "confidence": "unknown",
+              "ref": null,
+              "chestCounts": {
+                "total": 103,
+                "asOf": "7.1",
+                "source": "icy-veins (вкл. квестовые и испытания)"
+              }
+            }
+          ],
+          "addedIn": "7.0",
+          "computedTotal": {}
+        },
+        {
+          "id": "flamefeather_valley",
+          "name": "Долина огненных перьев",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": {
+                "primo": 176
+              },
+              "editor": "chests",
+              "confidence": "derived",
+              "ref": null,
+              "chestCounts": {
+                "common": 13,
+                "exquisite": 14,
+                "precious": 5,
+                "luxurious": 3,
+                "total": 35,
+                "asOf": "7.0",
+                "source": "allthings.how: Flamefeather Valley 100% guide (+11 сундуков с морой)"
+              },
+              "note": "176 = 13×2 + 14×5 + 5×10 + 3×10 (роскошные по 10); если все 3 роскошных по 40 — 266"
+            }
+          ],
+          "addedIn": "7.0",
+          "computedTotal": {
+            "primo": 176
+          }
+        },
+        {
+          "id": "white_birch_snowgrave",
+          "name": "White Birch Snowgrave",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": null,
+              "editor": "chests",
+              "confidence": "derived",
+              "ref": null,
+              "chestCounts": {
+                "total": 43,
+                "asOf": "7.0",
+                "source": "≈ 345 (стрим Arcyae: «338 из ~345») − 302 по остальным подобластям"
+              },
+              "note": "Число выведено, приблизительно"
+            }
+          ],
+          "addedIn": "7.0",
+          "computedTotal": {}
+        },
+        {
+          "id": "snezhnaya_72",
+          "name": "Снежная: область 7.2",
+          "chestBracket": "high",
+          "categories": [
+            {
+              "kind": "chests",
+              "title": "Сундуки",
+              "total": {
+                "primo": 1587
+              },
+              "editor": "chests",
+              "confidence": "leak",
+              "ref": null
+            },
+            {
+              "kind": "offering",
+              "title": "Подношения",
+              "total": {
+                "primo": 500
+              },
+              "editor": "amount",
+              "schedule": null,
+              "confidence": "leak",
+              "note": "Поуровневая разбивка не найдена — ввод суммой"
+            },
+            {
+              "kind": "statue",
+              "title": "Статуя (уровни)",
+              "total": {
+                "primo": 200
+              },
+              "editor": "amount",
+              "confidence": "leak"
+            },
+            {
+              "kind": "waypoints",
+              "title": "Точки телепортации",
+              "total": {
+                "primo": 160
+              },
+              "editor": "count",
+              "unit": {
+                "primo": 5
+              },
+              "count": 32,
+              "countDerived": true,
+              "confidence": "leak"
+            }
+          ],
+          "addedIn": "7.2",
+          "note": "Прогноз до выхода 7.2 (allthings.how, 05.10.2026) — leak",
+          "computedTotal": {
+            "primo": 2447
+          }
+        }
+      ],
+      "computedTotal": {
+        "primo": 6278,
+        "if": 4,
+        "af": 8
+      }
+    },
+    {
+      "id": "contested",
+      "name": "Спорные источники",
+      "videoChapter": "23:50",
+      "areas": [
+        {
+          "id": "contested_main",
+          "name": "Спорные источники",
+          "chestBracket": "high",
+          "categories": [],
+          "note": "Скринов главы нет — заполнить",
+          "computedTotal": {}
+        }
+      ],
+      "computedTotal": {}
+    }
+  ],
+  "general": [
+    {
+      "id": "adventure_rank",
+      "title": "Ранг приключений",
+      "total": {
+        "primo": 1500,
+        "af": 27
+      },
+      "editor": "amount",
+      "confidence": "video"
+    },
+    {
+      "id": "archon_quests",
+      "title": "Задания Архонтов",
+      "total": {
+        "primo": 2820
+      },
+      "editor": "amount",
+      "quick": [
+        30,
+        60,
+        100
+      ],
+      "confidence": "video"
+    },
+    {
+      "id": "handbook",
+      "title": "Гид по приключениям",
+      "total": {
+        "primo": 900,
+        "if": 46,
+        "af": 3
+      },
+      "editor": "binary",
+      "note": "Без детализации (по запросу)",
+      "confidence": "video"
+    },
+    {
+      "id": "story_quests",
+      "title": "Задания легенд",
+      "total": {
+        "primo": 3840
+      },
+      "editor": "amount",
+      "quick": [
+        30,
+        60
+      ],
+      "confidence": "video"
+    },
+    {
+      "id": "hangouts",
+      "title": "Встречи",
+      "total": {
+        "primo": 1140
+      },
+      "editor": "amount",
+      "quick": [
+        20,
+        60
+      ],
+      "confidence": "video"
+    },
+    {
+      "id": "achievements",
+      "title": "Достижения",
+      "total": {
+        "primo": 13380
+      },
+      "editor": "amount",
+      "quick": [
+        5,
+        10,
+        20
+      ],
+      "note": "Без детализации (по запросу)",
+      "confidence": "video"
+    },
+    {
+      "id": "abyss_corridor",
+      "title": "Витая бездна, этажи 1–8 (разово)",
+      "total": {
+        "primo": 2405
+      },
+      "editor": "count",
+      "count": 8,
+      "note": "Видео 2405; timesaver/sportskeeda — 2400. Разбивка по этажам не найдена: 300 за этаж — приближение",
+      "confidence": "video"
+    },
+    {
+      "id": "theater_debut",
+      "title": "Театр «Воображариум»: дебют (разово)",
+      "total": {
+        "primo": 1800
+      },
+      "editor": "amount",
+      "note": "Совпадает с timesaver: 1800 за первые прохождения",
+      "confidence": "video"
+    },
+    {
+      "id": "teapot",
+      "title": "Чайник безмятежности (ранг доверия)",
+      "total": {
+        "primo": 600
+      },
+      "editor": "level",
+      "levels": [
+        {
+          "level": 1,
+          "primo": 60
+        },
+        {
+          "level": 2,
+          "primo": 60
+        },
+        {
+          "level": 3,
+          "primo": 60
+        },
+        {
+          "level": 4,
+          "primo": 60
+        },
+        {
+          "level": 5,
+          "primo": 60
+        },
+        {
+          "level": 6,
+          "primo": 60
+        },
+        {
+          "level": 7,
+          "primo": 60
+        },
+        {
+          "level": 8,
+          "primo": 60
+        },
+        {
+          "level": 9,
+          "primo": 60
+        },
+        {
+          "level": 10,
+          "primo": 60
+        }
+      ],
+      "note": "60 за ранг 1–10 (timesaver)",
+      "confidence": "video"
+    },
+    {
+      "id": "tcg",
+      "title": "Священный призыв семерых",
+      "total": {
+        "primo": 840
+      },
+      "editor": "amount",
+      "confidence": "video"
+    },
+    {
+      "id": "myriad_melodies",
+      "title": "Репертуар мириад мелодий",
+      "total": {
+        "primo": 140
+      },
+      "editor": "amount",
+      "confidence": "video"
+    },
+    {
+      "id": "tutorial",
+      "title": "Обучение",
+      "total": {
+        "primo": 685
+      },
+      "editor": "binary",
+      "note": "Без детализации (по запросу)",
+      "confidence": "video"
+    },
+    {
+      "id": "companions",
+      "title": "Компаньоны в чайнике",
+      "total": null,
+      "editor": "count",
+      "unit": {
+        "primo": 40
+      },
+      "note": "Не из видео: 40 за каждого персонажа (sportskeeda, timesaver); итог зависит от аккаунта",
+      "confidence": "tally"
+    }
+  ],
+  "generalTotal": {
+    "primo": 30050,
+    "af": 30,
+    "if": 46
+  },
+  "endgame": {
+    "abyss": {
+      "title": "Витая бездна (этажи 9–12)",
+      "reset": {
+        "monthDay": 16,
+        "time": "04:00",
+        "clock": "server"
+      },
+      "floors": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "chambersPerFloor": 3,
+      "maxStarsPerChamber": 3,
+      "floorMilestones": [
+        {
+          "stars": 3,
+          "primo": 50
+        },
+        {
+          "stars": 6,
+          "primo": 50
+        },
+        {
+          "stars": 9,
+          "primo": 100
+        }
+      ],
+      "maxPerCycle": 800,
+      "confidence": "tally",
+      "ref": "timesaver: How to get Primogems fast",
+      "note": "Награды не забранные до сброса сгорают. С 5.1 полные звёзды 9–10 этажа можно забрать без прохождения, если 11–12 закрыты на 9★"
+    },
+    "theater": {
+      "title": "Театр «Воображариум»",
+      "reset": {
+        "monthDay": 1,
+        "time": "04:00",
+        "clock": "server"
+      },
+      "acts": [
+        60,
+        60,
+        100,
+        60,
+        60,
+        100,
+        60,
+        120,
+        60,
+        120
+      ],
+      "arcana": [
+        100,
+        100
+      ],
+      "difficulties": [
+        {
+          "id": "easy",
+          "name": "Лёгкая",
+          "acts": 3,
+          "arcana": 0,
+          "confidence": "tally",
+          "note": "по схеме 4.7 — проверить"
+        },
+        {
+          "id": "normal",
+          "name": "Обычная",
+          "acts": 6,
+          "arcana": 0,
+          "confidence": "tally",
+          "note": "по схеме 4.7 — проверить"
+        },
+        {
+          "id": "hard",
+          "name": "Сложная",
+          "acts": 8,
+          "arcana": 0,
+          "confidence": "tally",
+          "note": "по схеме 4.7 — проверить"
+        },
+        {
+          "id": "visionary",
+          "name": "Визионер",
+          "acts": 10,
+          "arcana": 0,
+          "confidence": "tally"
+        },
+        {
+          "id": "lunar",
+          "name": "Лунный режим",
+          "acts": 10,
+          "arcana": 2,
+          "confidence": "tally",
+          "note": "нужно ≥ 28 персонажей 70+ уровня"
+        }
+      ],
+      "maxPerSeason": 1000,
+      "confidence": "tally",
+      "ref": "timesaver; theclick.gg (октябрь 2026)"
+    },
+    "stygian": {
+      "title": "Натиск (Stygian Onslaught)",
+      "difficulties": [
+        {
+          "level": 1,
+          "name": "Normal",
+          "primo": 150
+        },
+        {
+          "level": 2,
+          "name": "Advancing",
+          "primo": 150
+        },
+        {
+          "level": 3,
+          "name": "Hard",
+          "primo": 150
+        },
+        {
+          "level": 4,
+          "name": "Menacing",
+          "primo": 0
+        },
+        {
+          "level": 5,
+          "name": "Fearless",
+          "primo": 0
+        },
+        {
+          "level": 6,
+          "name": "Dire",
+          "primo": 0
+        }
+      ],
+      "cumulative": true,
+      "maxPerIteration": 450,
+      "confidence": "tally",
+      "ref": "gamertagmythras: Stygian Onslaught guide",
+      "note": "Прохождение сложности даёт награды всех нижних"
+    },
+    "hoyolab": {
+      "title": "Отметки HoYoLAB",
+      "rule": "20 примогемов за 4-ю, 11-ю и 18-ю отметку месяца (по счёту отметок, не по датам)",
+      "maxPerMonth": 60,
+      "confidence": "tally",
+      "ref": "timesaver"
+    }
+  }
+}

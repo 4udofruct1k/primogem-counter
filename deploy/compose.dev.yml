@@ -1,0 +1,21 @@
+# Локальная разработка (15.7): docker compose -f deploy/compose.dev.yml up -d db
+# Postgres на localhost:5432, логин/пароль/БД — primo (только для разработки).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: primo
+      POSTGRES_PASSWORD: primo
+      POSTGRES_DB: primo
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U primo -d primo']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata-dev:

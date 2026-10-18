@@ -1,0 +1,21 @@
+node_modules/
+dist/
+dev-dist/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# секреты — только в .env, не в git
+.env
+.env.*
+!.env.example
+
+# deploy
+deploy/backups/
+
+# e2e
+playwright-report/
+test-results/
+
+.DS_Store
+*.log
