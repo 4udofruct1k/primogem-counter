@@ -20,5 +20,6 @@ export function packFor(server: ServerId, now: string) {
     banners: resolveBanners(pack.banners, server),
     events: resolveEvents(pack.events, server),
     rules: normalizeRules(pack.rules),
+    eventTemplate: pack.eventTemplate,
   };
 }

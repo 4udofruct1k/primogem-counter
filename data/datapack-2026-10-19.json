@@ -1,5 +1,5 @@
 {
-  "packVersion": 4,
+  "packVersion": 5,
   "generatedAt": "2026-10-19T00:00:00Z",
   "gameVersion": "7.1",
   "versions": [
@@ -314,7 +314,8 @@
       "reward": {
         "primo": 420
       },
-      "confidence": "tally"
+      "confidence": "tally",
+      "slot": "small"
     },
     {
       "id": "7.1-snowball",
@@ -328,7 +329,8 @@
       "reward": {
         "primo": 420
       },
-      "confidence": "tally"
+      "confidence": "tally",
+      "slot": "small"
     },
     {
       "id": "7.1-overflowing-favor",
@@ -727,10 +729,45 @@
       "confidence": "projected"
     }
   ],
+  "eventTemplate": {
+    "confidence": "projected",
+    "ref": "пользователь, 19.10.2026",
+    "note": "В каждой версии 2 ивента по 420 (бывает 3) и 1 большой ~950 (сумма немного отличается); пробные персонажи — 2 × 20 = 40 в начале каждой фазы. Реальный ивент с полем slot занимает слот шаблона. Числа уточняются в админке.",
+    "slots": [
+      {
+        "id": "small",
+        "title": "Ивент версии",
+        "count": 2,
+        "reward": {
+          "primo": 420
+        }
+      },
+      {
+        "id": "big",
+        "title": "Большой ивент версии",
+        "count": 1,
+        "reward": {
+          "primo": 950
+        }
+      }
+    ],
+    "trialsPerPhase": {
+      "primo": 40
+    },
+    "versions": {
+      "7.1": {
+        "big": {
+          "count": 0,
+          "note": "Silverwing in Pursuit of the Moon (950) шёл 24.09–12.10 — прошёл, в датапак не включён, как и другие прошедшие ивенты 7.1"
+        }
+      }
+    }
+  },
   "notes": [
     "Регионы, уровни, общие источники и эндгейм — в primo_seed_regions.json (schemaVersion 2).",
     "Сумма архонт-бонуса 7.1 и ивента Overflowing Favor не опубликована — null.",
     "Если для Predictive Victory Dynamics / Snowball Fight известны даты окончания — дописать end.",
-    "Snezhnaya: регионы, сфера теней и квесты 7.0–7.1 — в primo_seed_regions.json."
+    "Snezhnaya: регионы, сфера теней и квесты 7.0–7.1 — в primo_seed_regions.json.",
+    "eventTemplate (пользователь, 19.10.2026): ивенты будущих версий — слоты 2 × 420 + 1 × 950 вместо одной строки events_tpl (сумма та же, 1790); правило events_tpl задаёт только сроки. Пробные персонажи — 40 за фазу, если баннеры фазы не объявлены."
   ]
 }

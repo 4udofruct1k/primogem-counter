@@ -137,10 +137,43 @@ describe('recurrence: правила версий', () => {
     expect(find(occs, 'fix_comp:7.2')!.reward).toEqual({ primo: 300 });
   });
 
-  it('events_tpl не генерируется для версии с реальными ивентами; leak-ивенты шаблон не отменяют', () => {
-    expect(find(occs, 'events_tpl:7.1')).toBeUndefined();
-    expect(find(occs, 'events_tpl:7.2')!.reward).toEqual({ primo: 1790 });
-    expect(find(occs, 'events_tpl:7.4')).toBeDefined();
+  it('ивенты версии по шаблону: 2 × 420 + 1 × 950, реальные ивенты со slot занимают слоты', () => {
+    // 7.1: малые — Predictive Victory и Snowball Fight, большой прошёл (count 0 в шаблоне)
+    expect(occs.filter((o) => o.id.startsWith('events_tpl:7.1:'))).toEqual([]);
+    const v72 = occs.filter((o) => o.id.startsWith('events_tpl:7.2:'));
+    expect(v72.map((o) => [o.id, o.reward])).toEqual([
+      ['events_tpl:7.2:small1', { primo: 420 }],
+      ['events_tpl:7.2:small2', { primo: 420 }],
+      ['events_tpl:7.2:big1', { primo: 950 }],
+    ]);
+    expect(v72.every((o) => o.confidence === 'projected' && o.category === 'event')).toBe(true);
+    // утёкший ивент без slot слоты не занимает
+    expect(occs.filter((o) => o.id.startsWith('events_tpl:7.4:'))).toHaveLength(3);
+  });
+
+  it('шаблон: в версии бывает 3 малых ивента, сумма большого правится по версии', () => {
+    const ctx = input();
+    const eventTemplate = {
+      ...ctx.eventTemplate!,
+      versions: {
+        ...ctx.eventTemplate!.versions,
+        '7.3': { small: { count: 3 }, big: { reward: { primo: 1000 } } },
+      },
+    };
+    const occs73 = materialize({ ...ctx, eventTemplate }).filter((o) => o.id.startsWith('events_tpl:7.3:'));
+    expect(occs73.map((o) => [o.id, o.reward.primo])).toEqual([
+      ['events_tpl:7.3:small1', 420],
+      ['events_tpl:7.3:small2', 420],
+      ['events_tpl:7.3:small3', 420],
+      ['events_tpl:7.3:big1', 1000],
+    ]);
+  });
+
+  it('без шаблона — одна строка events_tpl и правило раздела 7', () => {
+    const plain = materialize(input('europe', { eventTemplate: undefined }));
+    expect(find(plain, 'events_tpl:7.1')).toBeUndefined();
+    expect(find(plain, 'events_tpl:7.2')!.reward).toEqual({ primo: 1790 });
+    expect(find(plain, 'trials:7.2:p2')!.reward).toEqual({ primo: null });
   });
 
   it('new_content_tpl не генерируется для версии с новыми областями', () => {
@@ -156,14 +189,19 @@ describe('recurrence: правила версий', () => {
     expect(formatInOffset(find(occs, 'stream_codes:7.3')!.from, 8)).toBe('2026-12-04 06:00');
   });
 
-  it('пробные персонажи: 20 × 5★ фазы, неизвестный состав — null', () => {
+  it('пробные персонажи: 20 × 5★ объявленной фазы, иначе 40 за фазу по шаблону', () => {
     expect(find(occs, 'trials:7.1:p1')!.reward).toEqual({ primo: 40 });
     expect(find(occs, 'trials:7.1:p2')!.reward).toEqual({ primo: 40 });
+    expect(find(occs, 'trials:7.1:p1')!.confidence).toBe('tally');
     expect(find(occs, 'trials:7.2:p1')!.reward).toEqual({ primo: 40 });
-    expect(find(occs, 'trials:7.2:p2')!.reward).toEqual({ primo: null });
+    const p2 = find(occs, 'trials:7.2:p2')!;
+    expect(p2.reward).toEqual({ primo: 40 });
+    expect(p2.confidence).toBe('projected');
+    // 7.3: известна только утечка (одна 5★) — тоже шаблон
     const t73 = find(occs, 'trials:7.3:p1')!;
-    expect(t73.reward).toEqual({ primo: 20 });
-    expect(t73.confidence).toBe('leak');
+    expect(t73.reward).toEqual({ primo: 40 });
+    expect(t73.confidence).toBe('projected');
+    expect(formatInOffset(find(occs, 'trials:7.5:p2')!.from, 1)).toBe('2027-03-30 18:00');
   });
 
   it('натиск: окно 35 дней от старт + 7, id по версии', () => {

@@ -1,4 +1,5 @@
 // Материализация вхождений регулярных источников и ивентов (раздел 7).
+import { slotsForVersion } from './datapack';
 import { minRewards } from './reward';
 import {
   addDays,
@@ -16,6 +17,7 @@ import {
 import type {
   Banner,
   Confidence,
+  EventTemplate,
   ISO,
   LimitedEvent,
   Occurrence,
@@ -57,6 +59,8 @@ export interface MaterializeInput {
   payment: PaymentProfile;
   /** Версии, в которых по seed появились новые области (11.7) — для них нет new_content_tpl. */
   newContentVersions?: string[];
+  /** Шаблон ивентов версии и проб (датапак, `eventTemplate`). */
+  eventTemplate?: EventTemplate;
   settings?: MaterializeSettings;
   horizon?: { from: ISO; to: ISO };
 }
@@ -231,7 +235,38 @@ function materializePerVersion(ctx: RuleContext, s: Extract<Schedule, { kind: 'p
     const deadline = s.windowDays
       ? addDays(from, s.windowDays)
       : anchorTime(v, s.deadlineAnchor ?? 'versionEnd');
+    if (rule.id === 'events_tpl' && input.eventTemplate) {
+      materializeEventSlots(ctx, input.eventTemplate, v, from, deadline);
+      continue;
+    }
     ctx.push(occurrence(ctx, `${rule.id}:${v.id}`, from, deadline, { versionId: v.id }));
+  }
+}
+
+/**
+ * Ивенты версии по шаблону (DECISIONS D-123): на каждый слот — `count` вхождений
+ * `events_tpl:<версия>:<слот><n>`, за вычетом реальных ивентов версии с этим `slot`.
+ */
+function materializeEventSlots(
+  ctx: RuleContext,
+  template: EventTemplate,
+  v: Version,
+  from: ISO,
+  deadline: ISO,
+) {
+  for (const slot of slotsForVersion(template, v.id)) {
+    const real = ctx.input.events.filter((e) => e.versionId === v.id && e.slot === slot.id).length;
+    for (let n = real + 1; n <= slot.count; n++) {
+      ctx.push(
+        occurrence(ctx, `${ctx.rule.id}:${v.id}:${slot.id}${n}`, from, deadline, {
+          versionId: v.id,
+          title: `${slot.title} ${v.id} (${n})`,
+          reward: { ...slot.reward },
+          expected: { ...slot.reward },
+          confidence: template.confidence,
+        }),
+      );
+    }
   }
 }
 
@@ -241,7 +276,11 @@ function versionRuleApplies(input: MaterializeInput, ruleId: string, versionId: 
     case 'bp_paid':
       return bpPaidFor(input.payment, versionId);
     case 'events_tpl':
-      return !input.events.some((e) => e.versionId === versionId && e.confidence !== 'leak');
+      // со шаблоном слоты заполняются реальными ивентами по `slot`; без шаблона — правило раздела 7
+      return (
+        input.eventTemplate !== undefined ||
+        !input.events.some((e) => e.versionId === versionId && e.confidence !== 'leak')
+      );
     case 'new_content_tpl':
       return !(input.newContentVersions ?? []).includes(versionId);
     case 'maint_comp':
@@ -261,7 +300,14 @@ function materializePerPhase(ctx: RuleContext) {
       const from = phase === 1 ? v.start : v.phase2Start;
       const deadline = phase === 1 ? v.phase2Start : v.end;
       const extra: Partial<Occurrence> = { versionId: v.id };
-      if (banners.length === 0) {
+      const announced = banners.length > 0 && banners.every((b) => confidenceRank(b.confidence) === 0);
+      const template = input.eventTemplate?.trialsPerPhase;
+      if (!announced && template) {
+        // баннеры фазы не объявлены (или только утечка) — сумма за фазу из шаблона (DECISIONS D-124)
+        extra.reward = { ...template };
+        extra.expected = extra.reward;
+        extra.confidence = 'projected';
+      } else if (banners.length === 0) {
         extra.reward = nullReward(rule.reward);
         extra.expected = extra.reward;
         extra.confidence = 'unknown';

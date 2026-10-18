@@ -102,17 +102,20 @@ describe('forecast: сценарии (8.2)', () => {
   });
 
   it('Минимум без projected/leak, эндгейм по expectedMin; Максимум — номинал и leak', () => {
-    const T = '2027-01-31T00:00:00Z';
+    const T = '2027-03-01T00:00:00Z';
     const occs = applyStatuses(occurrences(), [], NOW).occurrences;
     const min = run({ occurrences: occs, target: T, scenario: 'min' });
     const exp = run({ occurrences: occs, target: T, scenario: 'expected' });
     const max = run({ occurrences: occs, target: T, scenario: 'max' });
 
     const ids = (r: typeof min) => r.contributions.map((c) => c.id);
-    expect(ids(min)).not.toContain('events_tpl:7.2');
-    expect(ids(exp)).toContain('events_tpl:7.2');
-    expect(ids(exp)).not.toContain('trials:7.3:p1');
-    expect(ids(max)).toContain('trials:7.3:p1');
+    expect(ids(min)).not.toContain('events_tpl:7.2:big1');
+    expect(ids(exp)).toContain('events_tpl:7.2:big1');
+    expect(ids(min)).not.toContain('trials:7.3:p1');
+    expect(ids(exp)).toContain('trials:7.3:p1');
+    // утечка (фонари 2027: 10 IF) — только в Максимуме
+    expect(ids(exp)).not.toContain('2027-lantern-rite');
+    expect(ids(max)).toContain('2027-lantern-rite');
 
     const abyssNov = (r: typeof min) => r.contributions.find((c) => c.id === 'abyss:2026-11')!.reward;
     expect(abyssNov(min)).toEqual({ primo: 600 });
@@ -122,7 +125,7 @@ describe('forecast: сценарии (8.2)', () => {
     expect(theater(min)).toEqual({ primo: 800 });
     expect(theater(max)).toEqual({ primo: 1000 });
     expect(min.primo).toBeLessThan(exp.primo);
-    expect(exp.primo).toBeLessThan(max.primo);
+    expect(exp.limitedPulls).toBeLessThan(max.limitedPulls);
   });
 
   it('трекер: в прогноз идёт ожидание минус уже начисленное прогрессом', () => {

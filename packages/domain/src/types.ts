@@ -143,7 +143,31 @@ export interface LimitedEvent {
   reward: Reward;
   nonPrimoReward?: string;
   tasks?: EventTask[];
+  /** Слот шаблона ивентов версии, который занимает этот ивент (`small` / `big`). */
+  slot?: string;
   confidence: Confidence;
+  ref?: string;
+  note?: string;
+}
+
+/** Слот шаблона ивентов версии: `count` ивентов по `reward`. */
+export interface EventSlot {
+  id: string;
+  title: string;
+  count: number;
+  reward: Reward;
+  note?: string;
+}
+
+/**
+ * Шаблон будущих ивентов версии (датапак, `eventTemplate`; правится в админке):
+ * 2 × 420 + 1 × 950, переопределения по версиям; пробные персонажи — сумма за фазу без объявленных баннеров.
+ */
+export interface EventTemplate {
+  confidence: Confidence;
+  slots: EventSlot[];
+  trialsPerPhase?: Reward;
+  versions?: Record<string, Record<string, Partial<Omit<EventSlot, 'id'>>>>;
   ref?: string;
   note?: string;
 }

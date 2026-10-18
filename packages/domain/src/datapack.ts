@@ -6,6 +6,8 @@ import type {
   Category,
   Confidence,
   EventTask,
+  EventSlot,
+  EventTemplate,
   LimitedEvent,
   RawTime,
   Reward,
@@ -37,6 +39,7 @@ export interface RawEvent {
   reward: Reward;
   nonPrimoReward?: string;
   tasks?: EventTask[];
+  slot?: string;
   confidence: string;
   ref?: string;
   note?: string;
@@ -66,6 +69,7 @@ export interface RawDatapack {
   banners: RawBanner[];
   events: RawEvent[];
   rules: RawRule[];
+  eventTemplate?: EventTemplate;
   notes?: string[];
 }
 
@@ -96,6 +100,7 @@ export function resolveEvents(raw: RawEvent[], server: ServerId): LimitedEvent[]
     };
     if (e.nonPrimoReward) ev.nonPrimoReward = e.nonPrimoReward;
     if (e.tasks) ev.tasks = e.tasks.map((t) => ({ ...t, reward: { ...t.reward } }));
+    if (e.slot) ev.slot = e.slot;
     if (e.ref) ev.ref = e.ref;
     if (e.note) ev.note = e.note;
     return ev;
@@ -122,5 +127,14 @@ export function normalizeRules(raw: RawRule[]): SourceRule[] {
     if (r.tracker) rule.tracker = r.tracker as TrackerKind;
     if (r.ref) rule.ref = r.ref;
     return rule;
+  });
+}
+
+/** Слоты шаблона для версии с учётом переопределений `versions[versionId]`. */
+export function slotsForVersion(template: EventTemplate, versionId: string): EventSlot[] {
+  const patch = template.versions?.[versionId] ?? {};
+  return template.slots.map((slot) => {
+    const p = patch[slot.id];
+    return p ? { ...slot, ...p, reward: { ...(p.reward ?? slot.reward) } } : slot;
   });
 }
