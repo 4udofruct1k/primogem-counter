@@ -14,7 +14,12 @@ const balance = {
   stardust: z.number().finite(),
 };
 
-export const WalletSnapshotSchema = z.object({ id: DocIdSchema, at: IsoSchema, ...balance, pity: PitySchema });
+export const WalletSnapshotSchema = z.object({
+  id: DocIdSchema,
+  at: IsoSchema,
+  ...balance,
+  pity: PitySchema,
+});
 
 export const LedgerEntrySchema = z.object({
   id: DocIdSchema,
@@ -141,7 +146,13 @@ export const SettingsSchema = z.object({
   countStarglitter: z.boolean(),
   autoApplyClaims: z.boolean(),
   /** Переопределения claimLagHours по id правила (раздел 6). */
-  claimLagHours: z.record(z.string(), z.number().min(0).max(24 * 60)),
+  claimLagHours: z.record(
+    z.string(),
+    z
+      .number()
+      .min(0)
+      .max(24 * 60),
+  ),
   /** Ожидания эндгейма для прогноза по id правила (abyss / theater / stygian). */
   expectations: z.record(z.string(), expectationMode),
   /** Темп разового контента, примогемов в неделю (11.6), 0 = выкл. */

@@ -2,7 +2,10 @@
 import { z } from 'zod';
 import { ConfidenceSchema, RewardSchema } from './primitives';
 
-const RawTimeSchema = z.object({ at: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/), clock: z.enum(['server', 'utc8']) });
+const RawTimeSchema = z.object({
+  at: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/),
+  clock: z.enum(['server', 'utc8']),
+});
 const id = z.string().min(1).max(100);
 
 export const RawVersionSchema = z.looseObject({
@@ -49,7 +52,9 @@ export const RawRuleSchema = z.looseObject({
   reward: RewardSchema,
   expected: RewardSchema.optional(),
   expectedMin: RewardSchema.optional(),
-  schedule: z.looseObject({ kind: z.enum(['daily', 'monthly', 'perVersion', 'perPhase', 'subscription', 'fixed']) }),
+  schedule: z.looseObject({
+    kind: z.enum(['daily', 'monthly', 'perVersion', 'perPhase', 'subscription', 'fixed']),
+  }),
   paid: z.boolean(),
   enabled: z.boolean().optional(),
   claimLagHours: z.number().min(0),
@@ -69,7 +74,9 @@ export const EventTemplateSchema = z.object({
   confidence: ConfidenceSchema,
   slots: z.array(EventSlotSchema),
   trialsPerPhase: RewardSchema.optional(),
-  versions: z.record(z.string(), z.record(z.string(), EventSlotSchema.omit({ id: true }).partial())).optional(),
+  versions: z
+    .record(z.string(), z.record(z.string(), EventSlotSchema.omit({ id: true }).partial()))
+    .optional(),
   ref: z.string().optional(),
   note: z.string().optional(),
 });
@@ -88,13 +95,25 @@ export const DatapackSchema = z.looseObject({
 
 export const SeedSchema = z.looseObject({
   schemaVersion: z.number().int(),
-  chestTypes: z.array(z.looseObject({ id, name: z.string(), values: z.object({ low: z.number(), high: z.number() }) })),
-  levelSchedules: z.record(z.string(), z.looseObject({ title: z.string(), levels: z.array(z.looseObject({ level: z.number() })) })),
+  chestTypes: z.array(
+    z.looseObject({ id, name: z.string(), values: z.object({ low: z.number(), high: z.number() }) }),
+  ),
+  levelSchedules: z.record(
+    z.string(),
+    z.looseObject({ title: z.string(), levels: z.array(z.looseObject({ level: z.number() })) }),
+  ),
   regions: z.array(
     z.looseObject({
       id,
       name: z.string(),
-      areas: z.array(z.looseObject({ id, name: z.string(), chestBracket: z.enum(['low', 'high', 'mixed']), categories: z.array(z.looseObject({ kind: z.string(), editor: z.string() })) })),
+      areas: z.array(
+        z.looseObject({
+          id,
+          name: z.string(),
+          chestBracket: z.enum(['low', 'high', 'mixed']),
+          categories: z.array(z.looseObject({ kind: z.string(), editor: z.string() })),
+        }),
+      ),
     }),
   ),
   general: z.array(z.looseObject({ id, editor: z.string() })),
@@ -121,6 +140,8 @@ export const ManifestSchema = z.object({
   packVersion: z.number(),
   seedSchemaVersion: z.number(),
   files: z.object({ datapack: FileRefSchema, seed: FileRefSchema }),
-  patch: z.object({ version: z.number().int(), sha256: z.string(), path: z.string(), updatedAt: z.string() }).nullable(),
+  patch: z
+    .object({ version: z.number().int(), sha256: z.string(), path: z.string(), updatedAt: z.string() })
+    .nullable(),
 });
 export type Manifest = z.infer<typeof ManifestSchema>;

@@ -17,7 +17,9 @@ export const ConfidenceSchema = z.enum([
 ]);
 
 /** UTC ISO с 'Z' (I1); миллисекунды допускаются. */
-export const IsoSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?Z$/, 'ожидается UTC ISO с Z');
+export const IsoSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?Z$/, 'ожидается UTC ISO с Z');
 
 const amount = z.number().finite().nullable().optional();
 export const RewardSchema = z.object({

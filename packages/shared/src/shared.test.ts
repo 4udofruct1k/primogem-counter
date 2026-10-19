@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import datapack from '../../../data/datapack-2026-10-19.json';
 import seed from '../../../data/primo_seed_regions.json';
 import {
+  AdminPatchBodySchema,
   COLLECTIONS,
   DatapackPatchSchema,
   DatapackSchema,
@@ -14,6 +15,7 @@ import {
   ServerIdSchema,
   SettingsSchema,
   SyncRequestSchema,
+  SyncResponseSchema,
 } from './index';
 
 describe('shared: игровые данные', () => {
@@ -111,5 +113,20 @@ describe('shared: API (14.2, 14.5)', () => {
     expect(
       SyncRequestSchema.safeParse({ cursor: 0, changes: [{ ...change, collection: 'users' }] }).success,
     ).toBe(false);
+  });
+
+  it('sync: отклонённые изменения — необязательное поле ответа', () => {
+    const base = { applied: [], conflicts: [], changes: [], cursor: 0 };
+    expect(SyncResponseSchema.safeParse(base).success).toBe(true);
+    const rejected = [{ collection: 'ledger', id: 'x', message: 'только добавление' }];
+    expect(SyncResponseSchema.parse({ ...base, more: false, rejected }).rejected).toEqual(rejected);
+  });
+
+  it('админка: патч проверяется схемой патча, baseVersion — целое ≥ 0', () => {
+    expect(AdminPatchBodySchema.safeParse({ patch: { notes: ['x'] }, baseVersion: 0 }).success).toBe(true);
+    expect(
+      AdminPatchBodySchema.safeParse({ patch: { events: [{ reward: {} }] }, baseVersion: 0 }).success,
+    ).toBe(false);
+    expect(AdminPatchBodySchema.safeParse({ patch: {}, baseVersion: -1 }).success).toBe(false);
   });
 });

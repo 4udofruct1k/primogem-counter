@@ -1,5 +1,6 @@
 // Контракты API (14.4, 14.5).
 import { z } from 'zod';
+import { DatapackPatchSchema } from './data';
 import { CollectionSchema } from './docs';
 import { DocIdSchema } from './primitives';
 
@@ -28,6 +29,8 @@ export const ChangePasswordBodySchema = z.object({
   newPassword: PasswordSchema,
 });
 export const DeleteAccountBodySchema = z.object({ password: z.string().min(1).max(256) });
+/** Новый код восстановления из настроек аккаунта — нужен текущий пароль (14.2). */
+export const NewRecoveryCodeBodySchema = z.object({ password: z.string().min(1).max(256) });
 
 export const RegisterResponseSchema = z.object({
   user: z.object({ id: z.string(), username: z.string(), createdAt: z.string() }),
@@ -40,7 +43,11 @@ export const MeResponseSchema = z.object({
   isAdmin: z.boolean(),
 });
 export const RecoverResponseSchema = z.object({ recoveryCode: z.string() });
-export const HealthResponseSchema = z.object({ ok: z.boolean(), db: z.enum(['up', 'down']), version: z.string() });
+export const HealthResponseSchema = z.object({
+  ok: z.boolean(),
+  db: z.enum(['up', 'down']),
+  version: z.string(),
+});
 
 /** Пакет синхронизации — до 500 изменений (14.5). */
 export const SYNC_BATCH_LIMIT = 500;
@@ -56,7 +63,9 @@ export const SyncRequestSchema = z.object({
   changes: z.array(SyncChangeSchema).max(SYNC_BATCH_LIMIT),
 });
 export const SyncResponseSchema = z.object({
-  applied: z.array(z.object({ collection: CollectionSchema, id: z.string(), version: z.number(), seq: z.number() })),
+  applied: z.array(
+    z.object({ collection: CollectionSchema, id: z.string(), version: z.number(), seq: z.number() }),
+  ),
   conflicts: z.array(
     z.object({
       collection: CollectionSchema,
@@ -76,6 +85,13 @@ export const SyncResponseSchema = z.object({
   cursor: z.number(),
   /** На сервере есть ещё изменения после `cursor` — повторить запрос. */
   more: z.boolean().optional(),
+  /**
+   * Изменения, которые сервер отклонил и не сохранил: документ не прошёл схему коллекции или это удаление
+   * из коллекции «только добавление». Остальные изменения запроса применяются как обычно.
+   */
+  rejected: z
+    .array(z.object({ collection: CollectionSchema, id: z.string(), message: z.string() }))
+    .optional(),
 });
 export type SyncChange = z.infer<typeof SyncChangeSchema>;
 export type SyncRequest = z.infer<typeof SyncRequestSchema>;
@@ -85,11 +101,49 @@ export const ExportResponseSchema = z.object({
   exportedAt: z.string(),
   user: z.object({ id: z.string(), username: z.string(), createdAt: z.string() }),
   docs: z.array(
-    z.object({ collection: CollectionSchema, id: z.string(), data: z.unknown(), version: z.number(), updatedAt: z.string() }),
+    z.object({
+      collection: CollectionSchema,
+      id: z.string(),
+      data: z.unknown(),
+      version: z.number(),
+      updatedAt: z.string(),
+    }),
   ),
 });
 
-export const ERROR_CODES = ['VALIDATION', 'AUTH_REQUIRED', 'BAD_CREDENTIALS', 'RATE_LIMIT', 'CONFLICT', 'NOT_FOUND', 'FORBIDDEN', 'INTERNAL'] as const;
+/** Один документ пользователя: GET /api/docs/:collection/:id. */
+export const DocResponseSchema = z.object({
+  collection: CollectionSchema,
+  id: z.string(),
+  data: z.unknown(),
+  version: z.number(),
+  updatedAt: z.string(),
+});
+
+/** Патч датапака из админки данных: текущая версия (0 и `{}` — патча нет). */
+export const AdminPatchResponseSchema = z.object({
+  version: z.number().int().min(0),
+  patch: z.unknown(),
+  updatedAt: z.string().nullable(),
+});
+/** Сохранение патча: `baseVersion` — версия, от которой шла правка (оптимистичная блокировка). */
+export const AdminPatchBodySchema = z.object({
+  patch: DatapackPatchSchema,
+  baseVersion: z.number().int().min(0),
+});
+
+export const ERROR_CODES = [
+  'VALIDATION',
+  'AUTH_REQUIRED',
+  'BAD_CREDENTIALS',
+  'RATE_LIMIT',
+  'CONFLICT',
+  'NOT_FOUND',
+  'FORBIDDEN',
+  'INTERNAL',
+] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
-export const ApiErrorSchema = z.object({ error: z.object({ code: z.enum(ERROR_CODES), message: z.string() }) });
+export const ApiErrorSchema = z.object({
+  error: z.object({ code: z.enum(ERROR_CODES), message: z.string() }),
+});
 export type ApiError = z.infer<typeof ApiErrorSchema>;
