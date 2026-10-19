@@ -80,9 +80,12 @@ export class Xoshiro128ss {
   }
 }
 
-/** Seed прогона i: baseSeed + i по модулю 2³² (13.4). */
+/**
+ * Seed прогона i: baseSeed + i по модулю 2³² (13.4). baseSeed сначала приводится к uint32: сумма остаётся
+ * меньше 2⁵³ и не теряет точность при seed до 2⁵³ − 1 (D-901). Соседние seed дают сдвинутые прогоны.
+ */
 export function runSeed(baseSeed: number, i: number): number {
-  return (baseSeed + i) >>> 0;
+  return ((baseSeed >>> 0) + i) >>> 0;
 }
 
 export function rngForRun(baseSeed: number, i: number): Xoshiro128ss {

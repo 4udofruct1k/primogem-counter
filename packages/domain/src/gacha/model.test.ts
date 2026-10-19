@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   CHAR4_RAMP,
   CHAR5_RAMP,
+  FATE_POINT_LIMIT,
   FATE_POINT_MAX,
   featuredWinChance,
   makeModel,
   rampChance,
   rampTable,
   resolveFiftyFifty,
+  startFatePoint,
+  startRadiance,
   WEAPON4_RAMP,
   WEAPON5_RAMP,
   weaponStandardShare,
@@ -96,5 +99,25 @@ describe('gacha/model: пресеты (13.2.2, 13.3)', () => {
     expect(featuredWinChance('classic')).toBe(0.5);
     expect(FATE_POINT_MAX).toEqual({ '5.0+': 1, '2.0-4.8': 2, '1.x': 0 });
     expect(weaponStandardShare(makeModel())).toBe(0.25);
+  });
+});
+
+describe('gacha/model: стартовое состояние выбора 5★ (D-915, D-919)', () => {
+  it('счётчик сияния: при сиянии — как есть (0…3), в «Классике» счётчика нет — 0', () => {
+    for (const c of [0, 1, 2, 3]) {
+      expect(startRadiance('radiance', c)).toBe(c);
+      expect(startRadiance('classic', c)).toBe(0);
+    }
+    // за пределами 0…3 — прижатие (ввод это отсекает, но МК и точный расчёт прижимают одинаково)
+    expect(startRadiance('radiance', 5)).toBe(3);
+    expect(startRadiance('radiance', -1)).toBe(0);
+  });
+
+  it('очко судьбы: прижато к максимуму пути; в «1.x» пути нет — 0; граница ввода — 2', () => {
+    expect(FATE_POINT_LIMIT).toBe(2);
+    expect([0, 1, 2].map((v) => startFatePoint('5.0+', v))).toEqual([0, 1, 1]);
+    expect([0, 1, 2].map((v) => startFatePoint('2.0-4.8', v))).toEqual([0, 1, 2]);
+    expect([0, 1, 2].map((v) => startFatePoint('1.x', v))).toEqual([0, 0, 0]);
+    expect(startFatePoint('2.0-4.8', -1)).toBe(0);
   });
 });

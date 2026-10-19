@@ -53,7 +53,8 @@ export function simTargetOf(need: GoalNeed): { cons: number | null; refs: number
 /**
  * Медиана и p90 круток до цели по точному распределению модели «Сообщество» (13.6: рядом с худшим случаем).
  * Части суммы складываются свёрткой; первая часть баннера берёт Pity кошелька, следующие того же баннера —
- * с нуля (после выпавшей 5★ счётчик сброшен). «N круток» — сдвиг. Цель только из «круток» — null.
+ * с нуля (после выпавшей 5★ счётчик сброшен). «N круток» — сдвиг. Цель только из «круток» или вне диапазона
+ * точного расчёта (RangeError) — null.
  */
 export function goalPullStats(model: Model, need: GoalNeed): { median: number; p90: number } | null {
   const gm = makeModel('community');
@@ -79,7 +80,12 @@ export function goalPullStats(model: Model, need: GoalNeed): { median: number; p
     } else if (n.kind === 'sum') n.parts.forEach(walk);
     else shift += n.n;
   };
-  walk(need);
+  try {
+    walk(need);
+  } catch (e) {
+    if (e instanceof RangeError) return null;
+    throw e;
+  }
   if (pmfs.length === 0) return null;
   let pmf = Array.from(pmfs[0]!);
   for (const next of pmfs.slice(1)) {

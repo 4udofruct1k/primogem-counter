@@ -27,6 +27,8 @@ export const CLASSIC_FEATURED_WIN = 0.5;
 
 /** Очков судьбы до гарантированного выбранного оружия; 0 — пути нет. */
 export const FATE_POINT_MAX: Record<EpitomizedPath, number> = { '5.0+': 1, '2.0-4.8': 2, '1.x': 0 };
+/** Граница ввода очка судьбы — максимум среди путей (как `PitySchema`); сверх пути модели — прижимается. */
+export const FATE_POINT_LIMIT = Math.max(...Object.values(FATE_POINT_MAX));
 
 /** Выбранное и второе ивентовое — по 37,5%, стандартное — 25%. */
 export const WEAPON_CHOSEN = 0.375;
@@ -71,6 +73,17 @@ export function rampTable(r: Ramp): Float64Array {
   return t;
 }
 
+/** Стартовый счётчик сияния (D-915): прижат к 0…3; в «Классике» счётчика нет — 0. Общий для МК и exact.ts. */
+export function startRadiance(ff: FiftyFifty, radiance: number): number {
+  return ff === 'radiance' ? Math.min(Math.max(radiance, 0), RADIANCE_SAFETY) : 0;
+}
+
+/** Стартовое очко судьбы (D-915): прижато к 0…максимум пути модели; в «1.x» пути нет — 0. */
+export function startFatePoint(path: EpitomizedPath, fatePoint: number): number {
+  const max = FATE_POINT_MAX[path];
+  return max > 0 ? Math.min(Math.max(fatePoint, 0), max) : 0;
+}
+
 export function weaponStandardShare(m: GachaModel): number {
   return 1 - m.weaponChosen - m.weaponOtherFeatured;
 }
@@ -100,4 +113,32 @@ export function rampError(r: Ramp): string | null {
   if (!(r.base >= 0 && r.base <= 1)) return 'base — от 0 до 1';
   if (!(r.step >= 0 && Number.isFinite(r.step))) return 'step — не меньше 0';
   return null;
+}
+
+const intIn = (v: number, lo: number, hi: number) => Number.isInteger(v) && v >= lo && v <= hi;
+
+/** Ошибка в счётчике pity (null — всё в порядке): целое 0…hard − 1 рампы. Рампа должна быть проверена. */
+export function pityCounterError(name: string, v: number, r: Ramp): string | null {
+  return intIn(v, 0, r.hard - 1) ? null : `${name} — целое от 0 до ${r.hard - 1}`;
+}
+
+/** Ошибка в счётчике сияния: целое 0…3 при любой модели 50/50 (в «Классике» он просто не используется). */
+export function radianceError(radiance: number): string | null {
+  return intIn(radiance, 0, RADIANCE_SAFETY) ? null : `Счётчик сияния — целое от 0 до ${RADIANCE_SAFETY}`;
+}
+
+/** Ошибка в очке судьбы: целое 0…FATE_POINT_LIMIT при любом пути. */
+export function fatePointError(fatePoint: number): string | null {
+  return intIn(fatePoint, 0, FATE_POINT_LIMIT) ? null : `Очко судьбы — целое от 0 до ${FATE_POINT_LIMIT}`;
+}
+
+/** Ошибка в числе копий цели: целое 1…max. */
+export function copiesError(name: string, copies: number, max: number): string | null {
+  return intIn(copies, 1, max) ? null : `${name} — целое от 1 до ${max}`;
+}
+
+/** Ошибка в долях броска 75/25. */
+export function weaponSharesError(m: GachaModel): string | null {
+  const ok = m.weaponChosen > 0 && m.weaponOtherFeatured >= 0 && m.weaponChosen + m.weaponOtherFeatured <= 1;
+  return ok ? null : 'Доли оружия: выбранное > 0, выбранное + второе ≤ 1';
 }

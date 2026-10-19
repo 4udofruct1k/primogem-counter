@@ -8,6 +8,7 @@ import {
   summarize,
   NOTHING_LABEL,
 } from './aggregate';
+import { cdfAt, charCopiesDist, weaponCopiesDist } from './exact';
 import { makeModel } from './model';
 import { runBatch, splitRuns } from './run';
 import { pity, simInput } from './test/input';
@@ -176,16 +177,32 @@ describe('gacha/aggregate: TC-36, TC-43 — режимы и инварианты
     }
   });
 
-  it('пример 13.5: бюджет 160, pity 20, без гаранта, C2 + R1 — порядок величин', () => {
-    const input = simInput({ mode: 'char_and_weapon', budget: 160, consTarget: 2, refTarget: 1 });
-    input.pity = pity({ char: 20 });
-    const s = summarize(input, runBatch(input, 0, 10000));
+  it('пример 13.5: бюджет 160, pity 20, без гаранта, C2 + R1 — в пределах 3σ от точного расчёта (D-920)', () => {
+    const N = 10_000;
+    const B = 160;
+    const input = simInput({
+      mode: 'char_and_weapon',
+      budget: B,
+      consTarget: 2,
+      refTarget: 1,
+      pity: pity({ char: 20 }),
+    });
+    const s = summarize(input, runBatch(input, 0, N));
     expect(s.results.map((r) => r.label)).toEqual(['C0', 'C1', 'C2', 'C2 + R1']);
     expect(s.results[0].pct).toBe(100);
-    const [, c1, c2, r1] = s.results.map((r) => r.pct);
-    expect(Math.abs(c1 - 47.9)).toBeLessThan(1.5);
-    expect(Math.abs(c2 - 8.6)).toBeLessThan(1.5);
-    expect(Math.abs(r1 - 0.8)).toBeLessThan(1);
+    // Точно: C1 / C2 — 2 / 3 копии не позже 160-й; C2 + R1 — свёртка C2 с R1 из остатка (оружие с pity 0).
+    const m = input.model;
+    const c2 = charCopiesDist(m, input.pity, 3, B);
+    const r1 = weaponCopiesDist(m, input.pity, 1, B);
+    let c2r1 = 0;
+    for (let n = 0; n <= B; n++) c2r1 += c2.pmf[n] * cdfAt(r1, B - n);
+    const exact = [cdfAt(charCopiesDist(m, input.pity, 2, B), B), cdfAt(c2, B), c2r1];
+    expect(exact.map((p) => Math.round(p * 1e5) / 1e3)).toEqual([47.087, 8.183, 0.832]);
+    // 3σ биномиальной ошибки для N прогонов: 1,50 / 0,82 / 0,27 п.п.
+    s.results.slice(1).forEach((row, j) => {
+      const sigma = Math.sqrt((exact[j] * (1 - exact[j])) / N) * 100;
+      expect(Math.abs(row.pct - exact[j] * 100), row.label).toBeLessThan(3 * sigma);
+    });
     expect(s.combos[0].label).toBe('C0 + R0');
   });
 });

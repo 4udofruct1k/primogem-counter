@@ -4,10 +4,16 @@ import { STARGLITTER_PER_PULL } from '../wallet';
 import {
   CLASSIC_FEATURED_WIN,
   FATE_POINT_MAX,
+  fatePointError,
+  pityCounterError,
   RADIANCE_FEATURED_WIN,
   RADIANCE_SAFETY,
+  radianceError,
   rampError,
   rampTable,
+  startFatePoint,
+  startRadiance,
+  weaponSharesError,
 } from './model';
 import { runSeed, Xoshiro128ss } from './rng';
 import type { FiftyFifty, GachaModel, RunResult, SimInput } from './types';
@@ -82,10 +88,14 @@ export function milestoneLabels(input: SimInput): string[] {
   return labels;
 }
 
-/** Ошибка ввода (null — всё в порядке). */
+/**
+ * Ошибка ввода (null — всё в порядке). Pity проверяется целиком при любом режиме, как и рампы:
+ * счётчики — целые 0…hard − 1 своей рампы, сияние 0…3, очко судьбы 0…2 (D-919).
+ */
 export function simInputError(input: SimInput): string | null {
-  const { budget, consTarget, refTarget, seed, model: m, starglitter: sg } = input;
+  const { budget, runs, consTarget, refTarget, seed, pity: p, model: m, starglitter: sg } = input;
   if (!Number.isInteger(budget) || budget < 0) return 'Бюджет — целое число круток не меньше 0';
+  if (!Number.isInteger(runs) || runs < 1) return 'Прогонов — целое число не меньше 1';
   if (!Number.isInteger(consTarget) || consTarget < 0 || consTarget > MAX_CONS)
     return 'Цель по созвездиям — C0…C6';
   if (!Number.isInteger(refTarget) || refTarget < 1 || refTarget > MAX_REFS) return 'Цель по сигне — R1…R5';
@@ -94,8 +104,15 @@ export function simInputError(input: SimInput): string | null {
     const err = rampError(m[key]);
     if (err) return `Модель ${key}: ${err}`;
   }
-  if (!(m.weaponChosen > 0 && m.weaponOtherFeatured >= 0 && m.weaponChosen + m.weaponOtherFeatured <= 1))
-    return 'Доли оружия: выбранное > 0, выбранное + второе ≤ 1';
+  const err =
+    pityCounterError('Pity персонажа', p.char, m.char5) ??
+    pityCounterError('Pity 4★ персонажа', p.char4 ?? 0, m.char4) ??
+    radianceError(p.radiance) ??
+    pityCounterError('Pity оружия', p.weapon, m.weapon5) ??
+    pityCounterError('Pity 4★ оружия', p.weapon4 ?? 0, m.weapon4) ??
+    fatePointError(p.weaponFatePoint) ??
+    weaponSharesError(m);
+  if (err) return err;
   for (const v of [sg.per4, sg.perStd5, sg.perDup5, sg.perWeapon5])
     if (!(v >= 0 && Number.isFinite(v))) return 'Блеск за выпадение — не меньше 0';
   return null;
@@ -156,13 +173,13 @@ function simulate(c: Prepared, rng: Xoshiro128ss, i: number): RunResult {
   let other = 0;
   let wstd = 0;
 
+  // pity проверены (simInputError): целые 0…hard − 1; сияние и очко прижимаются, как в exact.ts (D-919)
   if (c.char) {
-    const hard5 = t5c.length - 1;
     const hard4 = t4c.length - 1;
-    let p5 = Math.min(Math.max(pity.char, 0), hard5 - 1);
-    let p4 = Math.max(pity.char4 ?? 0, 0);
-    const st: CharPickState = { guaranteed: pity.charGuaranteed, radiance: pity.radiance };
+    let p5 = pity.char;
+    let p4 = pity.char4 ?? 0;
     const ff = model.fiftyFifty;
+    const st: CharPickState = { guaranteed: pity.charGuaranteed, radiance: startRadiance(ff, pity.radiance) };
     while (featured < c.copies && budget > 0) {
       budget--;
       used++;
@@ -198,11 +215,13 @@ function simulate(c: Prepared, rng: Xoshiro128ss, i: number): RunResult {
 
   // В «персонаж + сигна» оружие крутится только после цели по созвездиям (13.3.4).
   if (c.weapon && (!c.char || featured >= c.copies)) {
-    const hard5 = t5w.length - 1;
     const hard4 = t4w.length - 1;
-    let p5 = Math.min(Math.max(pity.weapon, 0), hard5 - 1);
-    let p4 = Math.max(pity.weapon4 ?? 0, 0);
-    const st: WeaponPickState = { guaranteed: pity.weaponGuaranteed, fatePoint: pity.weaponFatePoint };
+    let p5 = pity.weapon;
+    let p4 = pity.weapon4 ?? 0;
+    const st: WeaponPickState = {
+      guaranteed: pity.weaponGuaranteed,
+      fatePoint: startFatePoint(model.epitomized, pity.weaponFatePoint),
+    };
     while (chosen < input.refTarget && budget > 0) {
       budget--;
       used++;

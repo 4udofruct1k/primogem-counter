@@ -28,6 +28,21 @@ describe('gacha/rng: splitmix32 + xoshiro128** (13.4)', () => {
     expect(Array.from({ length: 8 }, () => c.next())).not.toEqual(seqA);
   });
 
+  it('большой seed: ((baseSeed >>> 0) + i) >>> 0 — без потери точности и переполнения', () => {
+    // seed около 2³² − 1 и большой номер прогона — перенос по модулю 2³²
+    expect(runSeed(2 ** 32 - 1, 99_999)).toBe(99_998);
+    expect(runSeed(2 ** 32 - 3, 100_000)).toBe(99_997);
+    // 2⁵³ − 1 ≡ 2³² − 1 (mod 2³²); сумма 2⁵³ + 1 в double округлилась бы до 2⁵³ → 0 вместо 1
+    for (let i = 0; i < 6; i++) {
+      expect(runSeed(Number.MAX_SAFE_INTEGER, i)).toBe(runSeed(2 ** 32 - 1, i));
+      expect(runSeed(-Number.MAX_SAFE_INTEGER, i)).toBe(runSeed(1, i));
+    }
+    expect(runSeed(Number.MAX_SAFE_INTEGER, 2)).toBe(1);
+    const a = rngForRun(2 ** 32 - 3, 100_000);
+    const b = rngForRun(0, 99_997);
+    expect(Array.from({ length: 8 }, () => a.next())).toEqual(Array.from({ length: 8 }, () => b.next()));
+  });
+
   it('пересев переиспользуемого генератора = новый генератор', () => {
     const x = new Xoshiro128ss(7);
     x.next();

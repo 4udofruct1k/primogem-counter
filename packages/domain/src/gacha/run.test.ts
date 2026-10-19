@@ -6,12 +6,14 @@ import {
   pickWeapon5,
   runAll,
   runBatch,
+  simInputError,
   splitRuns,
   type CharPickState,
   type WeaponPickState,
 } from './run';
 import { always, pity, simInput } from './test/input';
-import type { GachaModel, RunResult } from './types';
+import type { Pity } from '../types';
+import type { GachaModel, RunResult, SimInput } from './types';
 
 const community = makeModel('community');
 const U = [0, 0.3, 0.529, 0.53, 0.75, 0.999999];
@@ -268,6 +270,18 @@ describe('gacha/run: пакеты и воспроизводимость', () => 
     expect(runBatch(input, 0, 3)).not.toEqual(runBatch({ ...input, seed: input.seed + 1 }, 0, 3));
   });
 
+  it('seed прогона = baseSeed + i (13.4): соседние seed дают сдвинутые прогоны (D-901)', () => {
+    expect(runBatch(input, 1, 4)).toEqual(runBatch({ ...input, seed: input.seed + 1 }, 0, 3));
+  });
+
+  it('большой seed переносится по модулю 2³² без потери точности', () => {
+    const top = { ...input, seed: 2 ** 32 - 1 };
+    // прогоны 99 998, 99 999 при seed 2³² − 1 — это прогоны 99 997, 99 998 при seed 0
+    expect(runBatch(top, 99_998, 100_000)).toEqual(runBatch({ ...input, seed: 0 }, 99_997, 99_999));
+    // 2⁵³ − 1 ≡ 2³² − 1 (mod 2³²): те же прогоны, в том числе с нечётным номером
+    expect(runBatch({ ...input, seed: Number.MAX_SAFE_INTEGER }, 0, 6)).toEqual(runBatch(top, 0, 6));
+  });
+
   it('splitRuns покрывает [0, runs) без дыр, пакеты отличаются не больше чем на 1', () => {
     const parts = splitRuns(10, 4);
     expect(parts).toEqual([
@@ -292,5 +306,71 @@ describe('gacha/run: пакеты и воспроизводимость', () => 
     expect(() => runBatch(simInput(), 2, 1)).toThrow(RangeError);
     const bad = { ...community, weaponChosen: 0.7, weaponOtherFeatured: 0.4 };
     expect(() => runBatch(simInput({ model: bad }), 0, 1)).toThrow(RangeError);
+  });
+});
+
+describe('gacha/run: проверка ввода (D-915, D-919)', () => {
+  type Bad = [string, Partial<SimInput>, string];
+  /** Счётчик сияния вне типа 0 | 1 | 2 | 3 — как из непроверенных данных. */
+  const radiance = (v: number) => v as Pity['radiance'];
+  const runs = (v: number) => v as SimInput['runs'];
+
+  it('все pity — целые в границах модели; иначе понятная ошибка и RangeError в runBatch', () => {
+    const custom = { ...community, char5: { ...community.char5, hard: 80 } };
+    const cases: Bad[] = [
+      ['pity 5★ дробный', { pity: pity({ char: 20.5 }) }, 'Pity персонажа — целое от 0 до 89'],
+      ['pity 5★ NaN', { pity: pity({ char: NaN }) }, 'Pity персонажа — целое от 0 до 89'],
+      ['pity 5★ < 0', { pity: pity({ char: -1 }) }, 'Pity персонажа — целое от 0 до 89'],
+      ['pity 5★ = hard', { pity: pity({ char: 90 }) }, 'Pity персонажа — целое от 0 до 89'],
+      [
+        'pity 5★ ≥ hard «Своих»',
+        { pity: pity({ char: 85 }), model: custom },
+        'Pity персонажа — целое от 0 до 79',
+      ],
+      ['pity 4★ персонажа', { pity: pity({ char4: 10 }) }, 'Pity 4★ персонажа — целое от 0 до 9'],
+      ['pity 4★ дробный', { pity: pity({ char4: 1.5 }) }, 'Pity 4★ персонажа — целое от 0 до 9'],
+      ['сияние 4', { pity: pity({ radiance: radiance(4) }) }, 'Счётчик сияния — целое от 0 до 3'],
+      ['сияние −1', { pity: pity({ radiance: radiance(-1) }) }, 'Счётчик сияния — целое от 0 до 3'],
+      ['сияние 1,5', { pity: pity({ radiance: radiance(1.5) }) }, 'Счётчик сияния — целое от 0 до 3'],
+      ['pity оружия', { pity: pity({ weapon: 80 }) }, 'Pity оружия — целое от 0 до 79'],
+      ['pity оружия NaN', { pity: pity({ weapon: NaN }) }, 'Pity оружия — целое от 0 до 79'],
+      ['pity 4★ оружия', { pity: pity({ weapon4: 9 }) }, 'Pity 4★ оружия — целое от 0 до 8'],
+      ['pity 4★ оружия < 0', { pity: pity({ weapon4: -1 }) }, 'Pity 4★ оружия — целое от 0 до 8'],
+      ['очко судьбы 3', { pity: pity({ weaponFatePoint: 3 }) }, 'Очко судьбы — целое от 0 до 2'],
+      ['очко судьбы 0,5', { pity: pity({ weaponFatePoint: 0.5 }) }, 'Очко судьбы — целое от 0 до 2'],
+      ['очко судьбы −1', { pity: pity({ weaponFatePoint: -1 }) }, 'Очко судьбы — целое от 0 до 2'],
+      ['бюджет NaN', { budget: NaN }, 'Бюджет — целое число круток не меньше 0'],
+      ['бюджет ∞', { budget: Infinity }, 'Бюджет — целое число круток не меньше 0'],
+      ['прогонов 0', { runs: runs(0) }, 'Прогонов — целое число не меньше 1'],
+      ['прогонов 1,5', { runs: runs(1.5) }, 'Прогонов — целое число не меньше 1'],
+      ['цель C2,5', { consTarget: 2.5 }, 'Цель по созвездиям — C0…C6'],
+      ['цель C−1', { consTarget: -1 }, 'Цель по созвездиям — C0…C6'],
+      ['цель R1,5', { refTarget: 1.5 }, 'Цель по сигне — R1…R5'],
+      ['цель R6', { refTarget: 6 }, 'Цель по сигне — R1…R5'],
+    ];
+    for (const [name, p, message] of cases) {
+      for (const mode of ['char_only', 'weapon_only', 'char_and_weapon'] as const) {
+        const input = simInput({ budget: 10, mode, ...p });
+        expect(simInputError(input), `${name}, ${mode}`).toBe(message);
+        expect(() => runBatch(input, 0, 1), `${name}, ${mode}`).toThrow(new RangeError(message));
+      }
+    }
+  });
+
+  it('границы допустимы; очко судьбы до 2 при любом пути (лишнее прижимается), сияние — при «Классике»', () => {
+    const ok: Partial<SimInput>[] = [
+      { pity: pity({ char: 89, char4: 9, radiance: 3, weapon: 79, weapon4: 8, weaponFatePoint: 2 }) },
+      { pity: pity({ char: 0, char4: 0, radiance: 0, weapon: 0, weapon4: 0, weaponFatePoint: 0 }) },
+      { pity: pity() }, // 4★ не заданы — 0
+      { pity: pity({ weaponFatePoint: 2 }), model: makeModel('community', { epitomized: '1.x' }) },
+      { pity: pity({ radiance: 3 }), model: makeModel('community', { fiftyFifty: 'classic' }) },
+      { budget: 0, runs: 100, consTarget: 0, refTarget: 1 },
+      { consTarget: 6, refTarget: 5 },
+    ];
+    for (const p of ok) {
+      const input = simInput({ mode: 'char_and_weapon', budget: 10, ...p });
+      expect(simInputError(input)).toBeNull();
+      expect(runBatch(input, 0, 1)).toHaveLength(1);
+    }
   });
 });

@@ -2,7 +2,22 @@
 // Число круток между 5★ не зависит от того, кто выпал, поэтому распределение «круток до цели» =
 // Σ_k P(понадобилось k пятизвёздочных) × (круток до первой 5★) ⊛ (круток между 5★)^(k − 1).
 import type { Pity } from '../types';
-import { FATE_POINT_MAX, featuredWinChance, RADIANCE_SAFETY, rampChance, weaponStandardShare } from './model';
+import {
+  copiesError,
+  FATE_POINT_MAX,
+  fatePointError,
+  featuredWinChance,
+  pityCounterError,
+  RADIANCE_SAFETY,
+  radianceError,
+  rampChance,
+  rampError,
+  startFatePoint,
+  startRadiance,
+  weaponSharesError,
+  weaponStandardShare,
+} from './model';
+import { MAX_CONS, MAX_REFS } from './run';
 import type { FiftyFifty, GachaModel, Ramp } from './types';
 
 /** Масса, ниже которой цепочка исходов считается исчерпанной (только у «1.x» без потолка). */
@@ -11,8 +26,24 @@ const MAX_EVENTS = 10_000;
 /** Предел распределения круток, если худший случай не ограничен («1.x»). */
 export const EXACT_MAX_PULLS = 3000;
 
-/** pmf[k] = P(следующая 5★ ровно на k-й крутке от текущего pity); pmf[0] = 0. */
+/** Неверный ввод — RangeError с первой ошибкой, как в runBatch (D-919): NaN в pity зацикливал бы рампу. */
+function check(...errors: (string | null)[]): void {
+  for (const err of errors) if (err) throw new RangeError(err);
+}
+
+function rampCheck(name: string, r: Ramp): string | null {
+  const err = rampError(r);
+  return err && `${name}: ${err}`;
+}
+
+function maxPullsError(maxPulls: number | undefined): string | null {
+  if (maxPulls === undefined || (Number.isInteger(maxPulls) && maxPulls >= 0)) return null;
+  return 'Предел круток — целое число не меньше 0';
+}
+
+/** pmf[k] = P(следующая 5★ ровно на k-й крутке от текущего pity); pmf[0] = 0. pity — целое 0…hard − 1. */
 export function fiveStarPmf(ramp: Ramp, pity = 0): number[] {
+  check(rampCheck('Рампа', ramp), pityCounterError('Pity', pity, ramp));
   const pmf = [0];
   let survive = 1;
   for (let n = pity + 1; ; n++) {
@@ -51,6 +82,7 @@ export interface PullChanceRow {
 
 /** Таблица 13.2.3 для любой рампы и текущего pity. */
 export function pullChanceTable(ramp: Ramp, pity = 0): PullChanceRow[] {
+  check(rampCheck('Рампа', ramp), pityCounterError('Pity', pity, ramp));
   const rows: PullChanceRow[] = [];
   let survive = 1;
   for (let n = pity + 1; ; n++) {
@@ -145,17 +177,18 @@ function weaponStep(m: GachaModel, s: number): Step[] {
   ];
 }
 
+// Стартовые сияние и очко прижимаются теми же startRadiance / startFatePoint, что и в Монте-Карло (D-919).
 function charChain(ff: FiftyFifty, guaranteed: boolean, radiance: number, copies: number) {
-  const c = ff === 'radiance' ? Math.min(Math.max(radiance, 0), RADIANCE_SAFETY) : 0;
+  check(radianceError(radiance), copiesError('Копий персонажа', copies, MAX_CONS + 1));
   const steps = Array.from({ length: 8 }, (_, s) => charStep(ff, s));
-  return eventsPmf(steps, (guaranteed ? 4 : 0) + c, copies);
+  return eventsPmf(steps, (guaranteed ? 4 : 0) + startRadiance(ff, radiance), copies);
 }
 
 function weaponChain(m: GachaModel, guaranteed: boolean, fatePoint: number, copies: number) {
+  check(weaponSharesError(m), fatePointError(fatePoint), copiesError('Копий оружия', copies, MAX_REFS));
   const max = FATE_POINT_MAX[m.epitomized];
-  const pt = max > 0 ? Math.min(Math.max(fatePoint, 0), max) : 0;
   const steps = Array.from({ length: 2 * (max + 1) }, (_, s) => weaponStep(m, s));
-  return eventsPmf(steps, (guaranteed ? max + 1 : 0) + pt, copies);
+  return eventsPmf(steps, (guaranteed ? max + 1 : 0) + startFatePoint(m.epitomized, fatePoint), copies);
 }
 
 /** P(для `copies` ивентовых персонажей понадобилось ровно k пятизвёздочных). */
@@ -214,18 +247,32 @@ function combine(first: number[], base: number[], q: number[], rest: number, max
   return { pmf, mean, worstCase, truncated: Math.max(0, 1 - total) };
 }
 
-/** Круток до `copies` ивентовых 5★ персонажа (C0 = 1 копия) из текущего Pity. */
+/**
+ * Круток до `copies` ивентовых 5★ персонажа (C0 = 1 копия, до C6) из текущего Pity.
+ * Смотрит только на поля персонажа: pity 0…hard − 1, сияние 0…3; иначе RangeError (D-919).
+ */
 export function charCopiesDist(m: GachaModel, pity: Pity, copies: number, maxPulls?: number): ExactDist {
+  check(
+    rampCheck('Модель char5', m.char5),
+    pityCounterError('Pity персонажа', pity.char, m.char5),
+    maxPullsError(maxPulls),
+  );
   const { q, rest } = charChain(m.fiftyFifty, pity.charGuaranteed, pity.radiance, copies);
-  const first = fiveStarPmf(m.char5, Math.min(pity.char, m.char5.hard - 1));
-  return combine(first, fiveStarPmf(m.char5), q, rest, maxPulls);
+  return combine(fiveStarPmf(m.char5, pity.char), fiveStarPmf(m.char5), q, rest, maxPulls);
 }
 
-/** Круток до `copies` выбранного 5★ оружия (R1 = 1 копия) из текущего Pity. */
+/**
+ * Круток до `copies` выбранного 5★ оружия (R1 = 1 копия, до R5) из текущего Pity.
+ * Смотрит только на поля оружия: pity 0…hard − 1, очко 0…2 (сверх пути — прижимается); иначе RangeError.
+ */
 export function weaponCopiesDist(m: GachaModel, pity: Pity, copies: number, maxPulls?: number): ExactDist {
+  check(
+    rampCheck('Модель weapon5', m.weapon5),
+    pityCounterError('Pity оружия', pity.weapon, m.weapon5),
+    maxPullsError(maxPulls),
+  );
   const { q, rest } = weaponChain(m, pity.weaponGuaranteed, pity.weaponFatePoint, copies);
-  const first = fiveStarPmf(m.weapon5, Math.min(pity.weapon, m.weapon5.hard - 1));
-  return combine(first, fiveStarPmf(m.weapon5), q, rest, maxPulls);
+  return combine(fiveStarPmf(m.weapon5, pity.weapon), fiveStarPmf(m.weapon5), q, rest, maxPulls);
 }
 
 /** P(цель не позже n-й крутки). */

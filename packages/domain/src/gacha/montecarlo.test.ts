@@ -103,6 +103,42 @@ describe('gacha: Монте-Карло оружия (100 000 прогонов)',
   }
 });
 
+describe('gacha: Монте-Карло и точный расчёт на прижатом вводе (D-915, D-919)', () => {
+  const n = 20_000;
+  /** |МК − точное| < 3σ биномиальной ошибки для n прогонов. */
+  const near = (mc: number, p: number) =>
+    expect(Math.abs(mc - p)).toBeLessThan(3 * Math.sqrt((p * (1 - p)) / n));
+  const share = (at: number[], k: number) => at.filter((v) => v <= k).length / n;
+
+  it('очко судьбы 2 при «5.0+» (= 1): R1 первой же 5★, P(R1 ≤ N) — как у точного', () => {
+    const p = pity({ weapon: 10, weaponFatePoint: 2 });
+    const rs = runBatch(simInput({ mode: 'weapon_only', budget: 80, pity: p }), 0, n);
+    expect(rs.every((r) => r.refs === 1 && r.w5Chosen === 1 && r.w5Other + r.w5Std === 0)).toBe(true);
+    const d = weaponCopiesDist(official, p, 1);
+    expect(d.worstCase).toBe(67);
+    const at = reached(rs, 0);
+    for (const k of [50, 55, 58, 60]) near(share(at, k), cdfAt(d, k));
+  });
+
+  it('«1.x» с очком 2 (пути нет = 0): P(R1 ≤ N) — как у точного', () => {
+    const model = makeModel('community', { epitomized: '1.x' });
+    const p = pity({ weaponFatePoint: 2, weaponGuaranteed: true });
+    const rs = runBatch(simInput({ mode: 'weapon_only', budget: 5000, model, pity: p }), 0, n);
+    const d = weaponCopiesDist(model, p, 1);
+    const at = reached(rs, 0);
+    for (const k of [60, 80, 120, 160, 240]) near(share(at, k), cdfAt(d, k));
+  });
+
+  it('«Классика» со счётчиком сияния 3 (счётчика нет = 0): P(C0 ≤ N) — как у точного', () => {
+    const model = makeModel('community', { fiftyFifty: 'classic' });
+    const p = pity({ char: 30, radiance: 3 });
+    const rs = runBatch(simInput({ budget: 180, model, pity: p }), 0, n);
+    const d = charCopiesDist(model, p, 1);
+    const at = reached(rs, 0);
+    for (const k of [50, 60, 90, 120, 140]) near(share(at, k), cdfAt(d, k));
+  });
+});
+
 describe('gacha: скорость (M9 — 10 000 прогонов C6 + R1 на телефоне < 3 с)', () => {
   it('10 000 прогонов C6 + R1 с бюджетом на всё — в Node заметно меньше секунды', async ({ annotate }) => {
     const input = simInput({ mode: 'char_and_weapon', budget: 1500, consTarget: 6, refTarget: 1 });

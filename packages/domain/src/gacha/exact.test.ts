@@ -13,6 +13,7 @@ import {
   weaponEventsPmf,
 } from './exact';
 import { CHAR4_RAMP, CHAR5_RAMP, makeModel, WEAPON4_RAMP, WEAPON5_RAMP } from './model';
+import type { Pity } from '../types';
 import { pity } from './test/input';
 import type { Ramp } from './types';
 
@@ -224,5 +225,83 @@ describe('gacha/exact: оружейный путь (13.3.3)', () => {
     const d = weaponCopiesDist(makeModel('community', { epitomized: '1.x' }), pity(), 1);
     expect(d.truncated).toBeLessThan(1e-9);
     expect(cdfAt(d, 10_000)).toBeCloseTo(1, 9);
+  });
+});
+
+describe('gacha/exact: неверный ввод — RangeError, прижатие — как в Монте-Карло (D-915, D-919)', () => {
+  const throws = (f: () => unknown, message: string) => expect(f).toThrow(new RangeError(message));
+  /** Счётчик сияния вне типа 0 | 1 | 2 | 3 — как из непроверенных данных. */
+  const radiance = (v: number) => v as Pity['radiance'];
+
+  it('charCopiesDist: pity 5★, сияние, копии C0…C6, предел круток, рампа', () => {
+    const char = 'Pity персонажа — целое от 0 до 89';
+    throws(() => charCopiesDist(community, pity({ char: -1 }), 1), char);
+    throws(() => charCopiesDist(community, pity({ char: 1.5 }), 1), char);
+    throws(() => charCopiesDist(community, pity({ char: 90 }), 1), char);
+    const r = 'Счётчик сияния — целое от 0 до 3';
+    throws(() => charCopiesDist(community, pity({ radiance: radiance(4) }), 1), r);
+    throws(() => charCopiesDist(community, pity({ radiance: radiance(1.5) }), 1), r);
+    const copies = 'Копий персонажа — целое от 1 до 7';
+    for (const c of [0, 8, 1.5, NaN]) throws(() => charCopiesDist(community, pity(), c), copies);
+    const limit = 'Предел круток — целое число не меньше 0';
+    for (const n of [-1, 1.5, NaN]) throws(() => charCopiesDist(community, pity(), 1, n), limit);
+    const ramp = { ...community, char5: { ...CHAR5_RAMP, hard: 0 } };
+    throws(() => charCopiesDist(ramp, pity(), 1), 'Модель char5: hard — целое от 1 до 1000');
+    // раньше NaN зацикливал fiveStarPmf
+    throws(() => charCopiesDist(community, pity({ char: NaN }), 1), char);
+  });
+
+  it('weaponCopiesDist: pity 5★, очко судьбы, копии R1…R5, доли оружия', () => {
+    const weapon = 'Pity оружия — целое от 0 до 79';
+    throws(() => weaponCopiesDist(community, pity({ weapon: 80 }), 1), weapon);
+    throws(() => weaponCopiesDist(community, pity({ weapon: -1 }), 1), weapon);
+    const fate = 'Очко судьбы — целое от 0 до 2';
+    for (const v of [3, 0.5, -1])
+      throws(() => weaponCopiesDist(community, pity({ weaponFatePoint: v }), 1), fate);
+    const copies = 'Копий оружия — целое от 1 до 5';
+    for (const c of [0, 6, 2.5]) throws(() => weaponCopiesDist(community, pity(), c), copies);
+    const shares = { ...community, weaponChosen: 0 };
+    throws(() => weaponCopiesDist(shares, pity(), 1), 'Доли оружия: выбранное > 0, выбранное + второе ≤ 1');
+    throws(() => weaponCopiesDist(community, pity({ weapon: NaN }), 1), weapon);
+  });
+
+  it('цепочки исходов и одна 5★: сияние, очко, копии, pity', () => {
+    throws(
+      () => charEventsPmf('radiance', { guaranteed: false, radiance: 2.5 }, 1),
+      'Счётчик сияния — целое от 0 до 3',
+    );
+    throws(
+      () => charEventsPmf('radiance', { guaranteed: false, radiance: 0 }, 0),
+      'Копий персонажа — целое от 1 до 7',
+    );
+    throws(
+      () => weaponEventsPmf(community, { guaranteed: false, fatePoint: 1.5 }, 1),
+      'Очко судьбы — целое от 0 до 2',
+    );
+    throws(
+      () => weaponEventsPmf(community, { guaranteed: false, fatePoint: 0 }, 0),
+      'Копий оружия — целое от 1 до 5',
+    );
+    for (const v of [-1, 90, 0.5]) {
+      throws(() => fiveStarPmf(CHAR5_RAMP, v), 'Pity — целое от 0 до 89');
+      throws(() => pullChanceTable(CHAR5_RAMP, v), 'Pity — целое от 0 до 89');
+    }
+    throws(() => expectedPulls({ ...CHAR5_RAMP, step: NaN }), 'Рампа: step — не меньше 0');
+    throws(() => fiveStarPmf(CHAR5_RAMP, NaN), 'Pity — целое от 0 до 89');
+    throws(() => pullChanceTable(CHAR5_RAMP, NaN), 'Pity — целое от 0 до 89');
+  });
+
+  it('персонажный расчёт не смотрит на поля оружия (цели берут Pity кошелька целиком)', () => {
+    const p = pity({ char: 30, weapon: 1000, weaponFatePoint: 7 });
+    expect(charCopiesDist(community, p, 1)).toEqual(charCopiesDist(community, pity({ char: 30 }), 1));
+  });
+
+  it('очко сверх пути прижимается (2 при «5.0+» = 1, при «1.x» = 0); «Классика» не видит сияния', () => {
+    const at = (m: typeof community, fate: number) => weaponCopiesDist(m, pity({ weaponFatePoint: fate }), 1);
+    expect(at(community, 2)).toEqual(at(community, 1));
+    const old = makeModel('community', { epitomized: '1.x' });
+    expect(at(old, 2)).toEqual(at(old, 0));
+    const classic = makeModel('community', { fiftyFifty: 'classic' });
+    expect(charCopiesDist(classic, pity({ radiance: 3 }), 2)).toEqual(charCopiesDist(classic, pity(), 2));
   });
 });
