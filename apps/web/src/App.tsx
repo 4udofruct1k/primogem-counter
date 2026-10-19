@@ -12,6 +12,7 @@ import { TodayScreen } from './screens/TodayScreen';
 import { VersionScreen } from './screens/VersionScreen';
 import { WalletScreen } from './screens/WalletScreen';
 import { WishesScreen } from './screens/WishesScreen';
+import { usePwa } from './pwa';
 import { useApp, useModel, useServices } from './state/context';
 import { useNotifier } from './state/notifier';
 import { Button } from './ui/components';
@@ -136,6 +137,7 @@ function TopBar() {
 
 function Notices() {
   const notices = useApp((s) => s.notices);
+  const pwa = usePwa();
   const dismiss = useApp((s) => s.dismiss);
   useEffect(() => {
     if (notices.length === 0) return;
@@ -144,6 +146,14 @@ function Notices() {
   }, [notices, dismiss]);
   return (
     <div className="notices" aria-live="polite">
+      {pwa.needRefresh && (
+        <div className="notice">
+          <span>Доступна новая версия приложения</span>
+          <Button small variant="primary" onClick={pwa.update}>
+            Обновить
+          </Button>
+        </div>
+      )}
       {notices.map((n) => (
         <div key={n.id} className={`notice ${n.kind === 'error' ? 'notice-error' : ''}`}>
           <span>{n.text}</span>
