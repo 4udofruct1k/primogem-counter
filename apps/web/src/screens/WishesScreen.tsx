@@ -33,8 +33,8 @@ import { runSimulation, type PortFactory, type SimRun } from '../workers/pool';
 
 const MODES: { id: SimMode; label: string }[] = [
   { id: 'char_and_weapon', label: 'Персонаж + сигна' },
-  { id: 'char_only', label: 'Только персонаж' },
-  { id: 'weapon_only', label: 'Только оружие' },
+  { id: 'char_only', label: 'Персонаж' },
+  { id: 'weapon_only', label: 'Оружие' },
 ];
 const PRESET_NAMES: Record<SoftPreset, string> = {
   community: 'Сообщество',
@@ -254,7 +254,7 @@ function Wishes({ model, portFactory }: { model: Model; portFactory?: PortFactor
         </div>
         <BannerState form={form} set={set} />
         <ModelSettings form={form} set={set} />
-        <div className="grid2">
+        <div className="grid2" style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 3fr)' }}>
           <Field label="Прогонов">
             <select
               className="input"
