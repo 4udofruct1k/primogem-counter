@@ -1,5 +1,11 @@
 // Игровые данные: манифест /data, кэш в IndexedDB, работа без сети (14.6).
-import { applyDatapackPatch, type DatapackPatchLike, type RawDatapack, type RawSeed } from '@primo/domain';
+import {
+  applyDatapackPatch,
+  mergePacks,
+  type DatapackPatchLike,
+  type RawDatapack,
+  type RawSeed,
+} from '@primo/domain';
 import {
   DatapackPatchSchema,
   DatapackSchema,
@@ -55,9 +61,23 @@ export async function loadGameData(db: PrimoDB, fetchImpl: Fetch = fetch): Promi
   const load = async (key: string, ref: { path: string; sha256: string }) =>
     source === 'network' ? getFile(db, fetchImpl, key, ref) : (await db.gamefiles.get(key))?.json;
 
-  const basePack = DatapackSchema.parse(
+  const fresh = DatapackSchema.parse(
     await load('datapack', manifest.files.datapack),
   ) as unknown as RawDatapack;
+  // 16: новый пак поверх прежнего — версии, баннеры, ивенты и правила, которых в новом нет, остаются
+  const sha = manifest.files.datapack.sha256;
+  const merged = await db.gamefiles.get('datapack:merged');
+  let basePack: RawDatapack;
+  if (merged && merged.sha256 === sha) basePack = merged.json as RawDatapack;
+  else {
+    basePack = mergePacks(fresh, merged ? (merged.json as RawDatapack) : null);
+    await db.gamefiles.put({
+      key: 'datapack:merged',
+      sha256: sha,
+      json: basePack,
+      fetchedAt: new Date().toISOString(),
+    });
+  }
   const seed = SeedSchema.parse(await load('seed', manifest.files.seed)) as unknown as RawSeed;
   let patch: DatapackPatchLike | null = null;
   if (manifest.patch) {

@@ -1,6 +1,8 @@
 // Регрессии по аудиту веба: даты в зоне устройства, виртуальная луна, своя цена сундуков области.
 import { addChest, chestButtons, regionSummary } from '@primo/domain';
 import { afterEach, describe, expect, it } from 'vitest';
+import { loadGameData } from '../data/gamedata';
+import { PrimoDB } from '../data/db';
 import { makeHarness } from '../test/harness';
 import { date, dateTime, isIso, localDayToIso } from '../ui/format';
 import { createActions } from './actions';
@@ -127,5 +129,39 @@ describe('история эндгейма (6, 10.5)', () => {
     const abyss = m.trackerHistory.filter((o) => o.tracker === 'abyss').map((o) => o.id);
     expect(abyss.length).toBeGreaterThanOrEqual(3);
     expect(m.trackerHistory.every((o) => Date.parse(o.deadline!) <= Date.parse(s.now))).toBe(true);
+  });
+});
+
+describe('новый датапак мержится со старым (16)', () => {
+  it('версия, которой нет в новом паке, остаётся', async () => {
+    const datapack = (await import('../../../../data/datapack-2026-10-19.json')).default;
+    const seed = (await import('../../../../data/primo_seed_regions.json')).default;
+    const older = { ...datapack, versions: [{ ...datapack.versions[0]!, id: '6.9' }, ...datapack.versions] };
+    let current: { sha: string; pack: unknown } = { sha: 'a', pack: older };
+    const fetchImpl = async (path: string) =>
+      new Response(
+        JSON.stringify(
+          path === '/data/manifest.json'
+            ? {
+                generatedAt: '2026-10-19T00:00:00Z',
+                packVersion: 5,
+                seedSchemaVersion: seed.schemaVersion,
+                files: {
+                  datapack: { path: `/data/pack-${current.sha}.json`, sha256: current.sha },
+                  seed: { path: '/data/seed.json', sha256: 's' },
+                },
+                patch: null,
+              }
+            : path === '/data/seed.json'
+              ? seed
+              : current.pack,
+        ),
+      );
+    const db = new PrimoDB(`merge-${Math.random()}`);
+    expect((await loadGameData(db, fetchImpl)).datapack.versions.some((v) => v.id === '6.9')).toBe(true);
+    current = { sha: 'b', pack: datapack };
+    const second = await loadGameData(db, fetchImpl);
+    expect(second.datapack.versions.some((v) => v.id === '6.9')).toBe(true);
+    expect(second.datapack.versions.length).toBe(datapack.versions.length + 1);
   });
 });

@@ -38,6 +38,8 @@ import {
   type Version,
   versionAt,
   addDays,
+  applySeedPatch,
+  type PackSeedPatch,
 } from '@primo/domain';
 import { DEFAULT_SETTINGS, type Settings } from '@primo/shared';
 import type { GameData } from '../data/gamedata';
@@ -110,7 +112,8 @@ export function computeModel(game: GameData, docs: DocsState, now: ISO, deviceOf
   const events = resolveEvents(pack.events, server);
   const rules = applyOverrides('rule', normalizeRules(pack.rules), overrides);
 
-  const baseSeed = normalizeSeed(game.seed);
+  // патчи регионов, уровней и сундуков из пака — поверх seed, пользовательские правки — поверх них (16)
+  const baseSeed = normalizeSeed(applySeedPatch(game.seed, pack as PackSeedPatch));
   const userEntities = Object.values(docs.user_entity);
   const seed = customizeSeed(baseSeed, userEntities, overrides);
   const chestTypes = applyOverrides<ChestType>('chestType', seed.chestTypes, overrides);

@@ -10,6 +10,7 @@ export * from './recurrence';
 export * from './wallet';
 export * from './endgame';
 export * from './overrides';
+export * from './packmerge';
 export * from './regions';
 export * from './onetime';
 export * from './forecast';
