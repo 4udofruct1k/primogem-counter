@@ -1,7 +1,6 @@
-import { useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { AdminScreen } from './screens/AdminScreen';
 import { EndgameScreen } from './screens/EndgameScreen';
-import { ForecastScreen } from './screens/ForecastScreen';
 import { MoreScreen } from './screens/MoreScreen';
 import { Placeholder } from './screens/Placeholder';
 import { RegionsScreen } from './screens/RegionsScreen';
@@ -11,12 +10,17 @@ import { TimelineScreen } from './screens/TimelineScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { VersionScreen } from './screens/VersionScreen';
 import { WalletScreen } from './screens/WalletScreen';
-import { WishesScreen } from './screens/WishesScreen';
 import { usePwa } from './pwa';
 import { useApp, useModel, useServices } from './state/context';
 import { useNotifier } from './state/notifier';
 import { Button } from './ui/components';
 import { href, useRoute } from './ui/router';
+
+// графики (Recharts) и симулятор грузятся отдельно, при первом открытии экрана
+const ForecastScreen = lazy(() =>
+  import('./screens/ForecastScreen').then((m) => ({ default: m.ForecastScreen })),
+);
+const WishesScreen = lazy(() => import('./screens/WishesScreen').then((m) => ({ default: m.WishesScreen })));
 
 const NAV: [string, string, string][] = [
   ['today', 'Сегодня', '◉'],
@@ -58,7 +62,9 @@ export function App() {
   return (
     <div className="app">
       <TopBar />
-      <main className="main">{renderScreen(screen)}</main>
+      <main className="main">
+        <Suspense fallback={<div className="center muted">Загрузка…</div>}>{renderScreen(screen)}</Suspense>
+      </main>
       <nav className="bottomnav" aria-label="Разделы">
         {NAV.map(([id, label, ico]) => (
           <a key={id} href={href(id)} className={navKey === id ? 'active' : ''}>

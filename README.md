@@ -2,6 +2,8 @@
 
 Genshin pull planner: сколько круток есть, сколько будет к дате или баннеру и что ещё не забрано.
 Сайт (PWA) с простой регистрацией: данные пользователя хранятся на сервере, все игровые расчёты — в браузере.
+Ставится на телефон («Добавить на главный экран»), без сети открывается из кэша; симулятор молитв работает в режиме
+полёта.
 
 Спецификация — [PRIMO_SPEC.md](PRIMO_SPEC.md), технические решения — [DECISIONS.md](DECISIONS.md).
 
@@ -28,8 +30,11 @@ pnpm dev        # web http://localhost:5173 (прокси /api и /data на :30
 pnpm test       # Vitest: domain, shared, api, web
 pnpm lint       # ESLint
 pnpm typecheck  # tsc во всех пакетах
-pnpm e2e        # Playwright (поднимает api на PGlite и web сам)
+pnpm e2e        # Playwright: api на PGlite (:3100) + собранный web через vite preview (:4173), эмуляция телефона
 ```
+
+e2e проверяют вход, выход и восстановление по коду, синхронизацию двух устройств, симулятор без сети (10 000
+прогонов C6 + R1 быстрее 3 с) и открытие приложения без сети из кэша сервис-воркера.
 
 Без Docker api можно запустить на Postgres в WASM: `DATABASE_URL=pglite:memory pnpm dev`.
 
@@ -61,13 +66,23 @@ docker compose -f compose.prod.yml up -d --build   # миграции приме
 
 ### Бэкапы и восстановление
 
+Дампы лежат в `deploy/backups/` с правами `600`, владелец — тот же, что у папки (пользователь, клонировавший
+репозиторий): в них хэши паролей.
+
 ```bash
 docker compose -f compose.prod.yml exec backup backup.sh          # дамп вручную
 docker compose -f compose.prod.yml exec -T db pg_restore -U primo -d primo --clean < backups/primo-YYYY-MM-DD.dump
 ```
 
 Рекомендуется раз в сутки копировать `deploy/backups/` на внешнее хранилище (rclone или `scp`) и раз в месяц проверять
-восстановление в отдельную БД `primo_check`.
+восстановление в отдельную БД `primo_check`:
+
+```bash
+docker compose -f compose.prod.yml exec -T db createdb -U primo primo_check
+docker compose -f compose.prod.yml exec -T db pg_restore -U primo -d primo_check < backups/primo-YYYY-MM-DD.dump
+docker compose -f compose.prod.yml exec -T db psql -U primo -d primo_check -tAc 'select count(*) from users'
+docker compose -f compose.prod.yml exec -T db dropdb -U primo primo_check
+```
 
 ### Наблюдение
 
