@@ -24,7 +24,7 @@ import {
   type LabelProps,
 } from 'recharts';
 import { useActions, useApp, useModel } from '../state/context';
-import { goalNeed, goalTarget, needLabel } from '../state/goals';
+import { goalNeed, goalPullStats, goalTarget, needLabel } from '../state/goals';
 import { runForecast, type Model } from '../state/model';
 import { Badge, Button, Card, Empty, Field, NumberInput, Sheet, Stat, Tabs } from '../ui/components';
 import { date, dateTime, num, rewardText } from '../ui/format';
@@ -214,12 +214,21 @@ function GoalPanel({
 }) {
   const gap = goalGap(need, result.limitedPulls);
   const reach = reachDate(result.series, need);
+  const stats = useMemo(() => goalPullStats(model, goal.need), [model, goal.need]);
   return (
     <div className="stats">
       <Stat
         label={`Цель: ${goal.title || needLabel(goal.need)}`}
         value={num(need)}
-        sub="круток в худшем случае"
+        sub={
+          stats ? (
+            <span data-testid="goal-stats">
+              круток в худшем случае · медиана {num(stats.median)}, p90 {num(stats.p90)}
+            </span>
+          ) : (
+            'круток в худшем случае'
+          )
+        }
       />
       <Stat
         label={gap > 0 ? 'Не хватает' : 'Запас'}

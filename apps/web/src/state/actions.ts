@@ -1,6 +1,7 @@
 // Действия пользователя: отметки, сверка, траты, прогресс регионов и трекеров (5.1).
 import {
   addRewards,
+  applyReward,
   areaFlags,
   type Area,
   type AreaState,
@@ -100,6 +101,28 @@ export function createActions(store: AppStore) {
         reason: 'spend_pulls',
       };
       await write([{ collection: 'ledger', id: entry.id, data: entry }]);
+    },
+
+    /** «Записать реальные крутки» (13.6): списание и новый Pity — запись леджера и снимок после неё. */
+    async recordWishes(model: Model, n: number, pity: Pity) {
+      const at = nowIso(store);
+      const delta = spendPullsDelta(model.balance, n);
+      const entry: LedgerEntry = {
+        id: `spend:${at}:${newId().slice(0, 8)}`,
+        at,
+        delta,
+        reason: 'spend_pulls',
+      };
+      const snapAt = new Date(Date.parse(at) + 1).toISOString();
+      const id = `snap:${snapAt}:${newId().slice(0, 8)}`;
+      await write([
+        n > 0 ? { collection: 'ledger', id: entry.id, data: entry } : null,
+        {
+          collection: 'wallet_snapshot',
+          id,
+          data: { id, at: snapAt, ...applyReward(model.balance, delta), pity },
+        },
+      ]);
     },
 
     async manualEntry(delta: Reward, reason: LedgerEntry['reason'] = 'manual') {

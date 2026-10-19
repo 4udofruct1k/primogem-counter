@@ -11,6 +11,7 @@ import { TimelineScreen } from './screens/TimelineScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { VersionScreen } from './screens/VersionScreen';
 import { WalletScreen } from './screens/WalletScreen';
+import { WishesScreen } from './screens/WishesScreen';
 import { useApp, useModel, useServices } from './state/context';
 import { useNotifier } from './state/notifier';
 import { Button } from './ui/components';
@@ -93,7 +94,7 @@ function renderScreen(screen: string): ReactNode {
     case 'timeline':
       return <TimelineScreen />;
     case 'wishes':
-      return <Placeholder title="Молитвы" />;
+      return <WishesScreen />;
     case 'sources':
       return <SourcesScreen />;
     case 'admin':

@@ -64,16 +64,19 @@ export class LocalRepo {
    * - applied: версия документа обновляется, запись очереди снимается, если её не перезаписали после отправки;
    * - conflicts: берётся серверная версия (14.5), локальное изменение отбрасывается;
    * - changes: изменения с других устройств; документ с неотправленной правкой не трогается —
-   *   на следующем круге она даст конфликт и победит сервер.
-   * Возвращает id документов, обновлённых «с другого устройства».
+   *   на следующем круге она даст конфликт и победит сервер;
+   * - rejected: сервер изменение не сохранил (схема, удаление из «только добавление») — запись очереди
+   *   снимается, иначе она уходила бы на каждом круге; локальная копия остаётся до следующего изменения.
+   * Возвращает id документов, обновлённых «с другого устройства», и отклонённые изменения.
    */
   async applySync(
     sent: QueuedChange[],
     res: SyncResponse,
-  ): Promise<{ conflicts: string[]; updated: string[] }> {
+  ): Promise<{ conflicts: string[]; updated: string[]; rejected: { key: string; message: string }[] }> {
     const sentByKey = new Map(sent.map((c) => [c.key, c]));
     const conflicts: string[] = [];
     const updated: string[] = [];
+    const rejected: { key: string; message: string }[] = [];
     await this.db.transaction('rw', this.db.docs, this.db.queue, this.db.meta, async () => {
       for (const a of res.applied) {
         const key = docKey(a.collection, a.id);
@@ -98,6 +101,13 @@ export class LocalRepo {
         });
         conflicts.push(key);
       }
+      for (const r of res.rejected ?? []) {
+        const key = docKey(r.collection, r.id);
+        const queued = await this.db.queue.get(key);
+        const s = sentByKey.get(key);
+        if (queued && s && queued.at === s.at) await this.db.queue.delete(key);
+        rejected.push({ key, message: r.message });
+      }
       for (const ch of res.changes) {
         const key = docKey(ch.collection, ch.id);
         if (await this.db.queue.get(key)) continue;
@@ -116,7 +126,7 @@ export class LocalRepo {
       }
       await this.db.meta.put({ key: 'cursor', value: res.cursor });
     });
-    return { conflicts, updated };
+    return { conflicts, updated, rejected };
   }
 
   /** Выход из аккаунта: локальные данные очищаются, игровые данные остаются. */

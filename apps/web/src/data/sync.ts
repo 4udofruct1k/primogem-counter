@@ -16,6 +16,7 @@ export function createSync(store: AppStore, api: Api) {
     try {
       let conflicts = 0;
       let updated = 0;
+      const rejected: string[] = [];
       for (let round = 0; round < 100; round++) {
         const sent = await repo.pending(SYNC_BATCH_LIMIT);
         const cursor = await repo.cursor();
@@ -31,11 +32,21 @@ export function createSync(store: AppStore, api: Api) {
         const r = await repo.applySync(sent, res);
         conflicts += r.conflicts.length;
         updated += r.updated.length;
+        rejected.push(...r.rejected.map((x) => `${x.key}: ${x.message}`));
         if (!res.more && (await repo.pendingCount()) === 0) break;
         if (!res.more && sent.length === 0) break;
       }
       await store.getState().reloadDocs();
       store.getState().setSync({ state: 'idle', lastAt: new Date().toISOString(), message: null });
+      if (rejected.length > 0) {
+        console.warn('sync rejected', rejected);
+        store
+          .getState()
+          .notify(
+            `Сервер не принял изменений: ${rejected.length} — они остались только на этом устройстве`,
+            'error',
+          );
+      }
       if (conflicts > 0) store.getState().notify('Данные обновлены с другого устройства');
       else if (updated > 0) store.getState().notify(`Получены изменения с другого устройства: ${updated}`);
     } catch (e) {

@@ -24,6 +24,13 @@ export function fakeSyncServer() {
       const key = `${c.collection}/${c.id}`;
       const cur = rows.get(key);
       const current = cur?.version ?? 0;
+      if (APPEND_ONLY.includes(c.collection) && c.data === null) {
+        res.rejected = [
+          ...(res.rejected ?? []),
+          { collection: c.collection, id: c.id, message: 'append-only collection: delete is not allowed' },
+        ];
+        continue;
+      }
       if (APPEND_ONLY.includes(c.collection) && cur) {
         res.applied.push({ collection: c.collection, id: c.id, version: cur.version, seq: cur.seq });
         continue;

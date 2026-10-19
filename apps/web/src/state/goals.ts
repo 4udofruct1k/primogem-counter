@@ -1,5 +1,14 @@
 // Цели (8.4, раздел 5): момент цели и нужное число круток (гарантированный худший случай).
-import { needPulls, type Goal, type GoalNeed, type ISO } from '@primo/domain';
+import {
+  charCopiesDist,
+  makeModel,
+  needPulls,
+  weaponCopiesDist,
+  type Goal,
+  type GoalNeed,
+  type ISO,
+  type Pity,
+} from '@primo/domain';
 import type { Model } from './model';
 
 export function goalTarget(model: Model, goal: Goal): ISO | null {
@@ -39,4 +48,55 @@ export function simTargetOf(need: GoalNeed): { cons: number | null; refs: number
   };
   walk(need);
   return { cons, refs };
+}
+
+/**
+ * Медиана и p90 круток до цели по точному распределению модели «Сообщество» (13.6: рядом с худшим случаем).
+ * Части суммы складываются свёрткой; первая часть баннера берёт Pity кошелька, следующие того же баннера —
+ * с нуля (после выпавшей 5★ счётчик сброшен). «N круток» — сдвиг. Цель только из «круток» — null.
+ */
+export function goalPullStats(model: Model, need: GoalNeed): { median: number; p90: number } | null {
+  const gm = makeModel('community');
+  const fresh: Pity = {
+    ...model.pity,
+    char: 0,
+    charGuaranteed: false,
+    radiance: 0,
+    weapon: 0,
+    weaponGuaranteed: false,
+    weaponFatePoint: 0,
+  };
+  const used = { char: false, weapon: false };
+  const pmfs: ArrayLike<number>[] = [];
+  let shift = 0;
+  const walk = (n: GoalNeed) => {
+    if (n.kind === 'char5') {
+      pmfs.push(charCopiesDist(gm, used.char ? fresh : model.pity, n.copies).pmf);
+      used.char = true;
+    } else if (n.kind === 'weapon5') {
+      pmfs.push(weaponCopiesDist(gm, used.weapon ? fresh : model.pity, n.copies).pmf);
+      used.weapon = true;
+    } else if (n.kind === 'sum') n.parts.forEach(walk);
+    else shift += n.n;
+  };
+  walk(need);
+  if (pmfs.length === 0) return null;
+  let pmf = Array.from(pmfs[0]!);
+  for (const next of pmfs.slice(1)) {
+    const out = new Array<number>(pmf.length + next.length - 1).fill(0);
+    for (let i = 0; i < pmf.length; i++) {
+      const a = pmf[i]!;
+      if (a) for (let j = 0; j < next.length; j++) out[i + j]! += a * next[j]!;
+    }
+    pmf = out;
+  }
+  const quantile = (q: number) => {
+    let acc = 0;
+    for (let n = 0; n < pmf.length; n++) {
+      acc += pmf[n]!;
+      if (acc >= q - 1e-12) return n + shift;
+    }
+    return pmf.length - 1 + shift;
+  };
+  return { median: quantile(0.5), p90: quantile(0.9) };
 }
