@@ -14,12 +14,10 @@ describe('гостевой режим (M2)', () => {
 
   it('документы пишутся в IndexedDB и переживают перезапуск; очередь копится', async () => {
     const h = await makeHarness();
-    await h.store
-      .getState()
-      .put('occ_status', 'daily_commissions:2026-10-19', {
-        id: 'daily_commissions:2026-10-19',
-        status: 'claimed',
-      });
+    await h.store.getState().put('occ_status', 'daily_commissions:2026-10-19', {
+      id: 'daily_commissions:2026-10-19',
+      status: 'claimed',
+    });
     expect(h.store.getState().sync.pending).toBe(1);
 
     const again = await makeHarness({ dbName: h.dbName });

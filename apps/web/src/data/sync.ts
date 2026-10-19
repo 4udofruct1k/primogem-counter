@@ -45,12 +45,10 @@ export function createSync(store: AppStore, api: Api) {
         return;
       }
       const offline = e instanceof ApiFailure && e.code === 'NETWORK';
-      store
-        .getState()
-        .setSync({
-          state: offline ? 'offline' : 'error',
-          message: e instanceof Error ? e.message : String(e),
-        });
+      store.getState().setSync({
+        state: offline ? 'offline' : 'error',
+        message: e instanceof Error ? e.message : String(e),
+      });
     }
   }
 

@@ -3,6 +3,7 @@ import { MoreScreen } from './screens/MoreScreen';
 import { Placeholder } from './screens/Placeholder';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TodayScreen } from './screens/TodayScreen';
+import { VersionScreen } from './screens/VersionScreen';
 import { WalletScreen } from './screens/WalletScreen';
 import { useApp, useServices } from './state/context';
 import { Button } from './ui/components';
@@ -80,7 +81,7 @@ function renderScreen(screen: string): ReactNode {
     case 'endgame':
       return <Placeholder title="Эндгейм" />;
     case 'version':
-      return <Placeholder title="Версия" />;
+      return <VersionScreen />;
     case 'timeline':
       return <Placeholder title="Таймлайн" />;
     case 'wishes':

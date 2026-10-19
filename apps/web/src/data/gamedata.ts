@@ -46,7 +46,8 @@ export async function loadGameData(db: PrimoDB, fetchImpl: Fetch = fetch): Promi
     await db.meta.put({ key: 'manifest', value: manifest });
   } catch (e) {
     const cached = await db.meta.get('manifest');
-    if (!cached) throw new Error(`Нет связи с сервером и нет сохранённых игровых данных (${String(e)})`, { cause: e });
+    if (!cached)
+      throw new Error(`Нет связи с сервером и нет сохранённых игровых данных (${String(e)})`, { cause: e });
     manifest = ManifestSchema.parse(cached.value);
     source = 'cache';
   }
