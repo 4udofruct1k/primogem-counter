@@ -1,6 +1,6 @@
 import type { ServerId } from '@primo/domain';
 import type { Settings } from '@primo/shared';
-import { useActions, useModel } from '../state/context';
+import { useActions, useModel, useStoreApi } from '../state/context';
 import { Card, Field, NumberInput, Toggle } from '../ui/components';
 import { AccountCard } from './AccountCard';
 
@@ -105,6 +105,7 @@ export function SettingsScreen() {
           />
         </Field>
       </Card>
+      <ChestPrices />
       <Card title="Уведомления">
         <Toggle
           checked={s.notifications.enabled}
@@ -119,4 +120,50 @@ export function SettingsScreen() {
 
 function clamp5(v: number): number {
   return Math.max(0, Math.min(5, Math.floor(v)));
+}
+
+/** Глобальные цены сундуков (11.2): Override `chestType`. */
+function ChestPrices() {
+  const model = useModel();
+  const actions = useActions();
+  const store = useStoreApi();
+  if (!model) return null;
+  const save = (typeId: string, field: 'values.low' | 'values.high', value: number) =>
+    actions.putDoc('override', `chestType:${typeId}:${field}`, {
+      entity: 'chestType',
+      id: typeId,
+      field,
+      value,
+      at: store.deps.clock().toISOString(),
+    });
+  return (
+    <Card title="Цены сундуков">
+      <p className="muted small">
+        low — низкоуровневые зоны Мондштадта и Ли Юэ, high — остальные. Роскошный — две кнопки «+10» и «+40»
+        везде.
+      </p>
+      {model.calc.chestTypes
+        .filter((t) => !t.variants?.length)
+        .map((t) => (
+          <div key={t.id} className="grid2">
+            <Field label={`${t.name}: low`}>
+              <NumberInput
+                aria-label={`Цена ${t.name} low`}
+                value={t.values.low}
+                min={0}
+                onChange={(v) => save(t.id, 'values.low', Math.max(0, v))}
+              />
+            </Field>
+            <Field label={`${t.name}: high`}>
+              <NumberInput
+                aria-label={`Цена ${t.name} high`}
+                value={t.values.high}
+                min={0}
+                onChange={(v) => save(t.id, 'values.high', Math.max(0, v))}
+              />
+            </Field>
+          </div>
+        ))}
+    </Card>
+  );
 }

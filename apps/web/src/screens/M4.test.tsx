@@ -102,15 +102,13 @@ describe('M4: отметки синхронизируются', () => {
     const a = await mk();
     const b = await mk();
     await a.h.store.getState().put('occ_status', 'abyss:2026-10', { id: 'abyss:2026-10', status: 'claimed' });
-    await a.h.store
-      .getState()
-      .put('ledger', 'claim:abyss:2026-10:x', {
-        id: 'claim:abyss:2026-10:x',
-        at: '2026-10-19T05:00:00.000Z',
-        delta: { primo: 800 },
-        reason: 'claim',
-        refId: 'abyss:2026-10',
-      });
+    await a.h.store.getState().put('ledger', 'claim:abyss:2026-10:x', {
+      id: 'claim:abyss:2026-10:x',
+      at: '2026-10-19T05:00:00.000Z',
+      delta: { primo: 800 },
+      reason: 'claim',
+      refId: 'abyss:2026-10',
+    });
     await a.sync.syncNow();
     expect(a.h.store.getState().sync.pending).toBe(0);
     await b.sync.syncNow();

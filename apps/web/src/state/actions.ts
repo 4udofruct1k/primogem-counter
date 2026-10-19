@@ -162,9 +162,11 @@ export function createActions(store: AppStore) {
     async setRegionClosed(model: Model, region: Region, closed: boolean) {
       const at = nowIso(store);
       let delta: Reward = {};
+      const wasClosed =
+        (docs().region_state[region.id] as DocOf<'region_state'> | undefined)?.closed ?? false;
       for (const a of region.areas) {
         const state = docs().area_state[a.id] as AreaState | undefined;
-        const before = areaFlags(state, !closed);
+        const before = areaFlags(state, wasClosed);
         const after = areaFlags(state, closed);
         for (const c of a.categories) {
           const p = docs().cat_progress[c.id] as CategoryProgress | undefined;

@@ -17,6 +17,8 @@ export function oneTimeUnits(
   regionStates: Record<string, RegionState | undefined>,
   ctx: CalcContext,
   versions: Version[],
+  /** Контекст расчёта области (цены сундуков с переопределением на уровне области, 11.2). */
+  ctxForArea: (areaId: string) => CalcContext = () => ctx,
 ): OneTimeUnit[] {
   const units: OneTimeUnit[] = [];
   let order = 0;
@@ -31,7 +33,7 @@ export function oneTimeUnits(
         order: order++,
         plan: state?.plan ?? NO_PLAN,
         parts: area.categories.map((c) => {
-          const s = categorySummary(c, progress[c.id], flags, ctx);
+          const s = categorySummary(c, progress[c.id], flags, ctxForArea(area.id));
           return {
             id: c.id,
             title: `${area.name}: ${c.title}`,

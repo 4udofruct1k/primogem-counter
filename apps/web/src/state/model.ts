@@ -19,6 +19,7 @@ import {
   normalizeRules,
   normalizeSeed,
   type Occurrence,
+  type Override,
   oneTimeUnits,
   type OneTimeUnit,
   type PaymentProfile,
@@ -40,6 +41,7 @@ import {
 } from '@primo/domain';
 import { DEFAULT_SETTINGS, type Settings } from '@primo/shared';
 import type { GameData } from '../data/gamedata';
+import { areaContext, customizeSeed, orphanProgress } from './seedCustom';
 import type { DocsState } from './docs';
 
 export const DEFAULT_PAYMENT: PaymentProfile = {
@@ -70,6 +72,11 @@ export interface Model {
   rules: SourceRule[];
   seed: Seed;
   calc: CalcContext;
+  /** Контекст расчёта области — с ценами сундуков, переопределёнными для неё. */
+  ctxForArea: (areaId: string) => CalcContext;
+  overrides: Override[];
+  /** Прогресс категорий, которых нет в данных, — «устарела». */
+  orphans: string[];
   occurrences: Occurrence[];
   /** id вхождений, ставших missed при открытии (I3) — сохраняются в occ_status. */
   autoMissed: string[];
@@ -98,9 +105,12 @@ export function computeModel(game: GameData, docs: DocsState, now: ISO, deviceOf
   const events = resolveEvents(pack.events, server);
   const rules = applyOverrides('rule', normalizeRules(pack.rules), overrides);
 
-  const seed = normalizeSeed(game.seed);
+  const baseSeed = normalizeSeed(game.seed);
+  const userEntities = Object.values(docs.user_entity);
+  const seed = customizeSeed(baseSeed, userEntities, overrides);
   const chestTypes = applyOverrides<ChestType>('chestType', seed.chestTypes, overrides);
   const calc: CalcContext = { chestTypes, schedules: seed.schedules };
+  const ctxForArea = (areaId: string) => areaContext(calc, areaId, overrides);
 
   const materialized = materialize({
     now,
@@ -132,7 +142,16 @@ export function computeModel(game: GameData, docs: DocsState, now: ISO, deviceOf
     expectations[rule.id] = trackerExpectation(rule, mode, history);
   }
 
-  const oneTime = oneTimeUnits(seed, docs.cat_progress, docs.area_state, docs.region_state, calc, versions);
+  const oneTime = oneTimeUnits(
+    seed,
+    docs.cat_progress,
+    docs.area_state,
+    docs.region_state,
+    calc,
+    versions,
+    ctxForArea,
+  );
+  const orphans = orphanProgress(customizeSeed(baseSeed, userEntities, []), Object.keys(docs.cat_progress));
 
   return {
     now,
@@ -146,6 +165,9 @@ export function computeModel(game: GameData, docs: DocsState, now: ISO, deviceOf
     rules,
     seed,
     calc,
+    ctxForArea,
+    overrides,
+    orphans,
     occurrences,
     autoMissed,
     balance,
