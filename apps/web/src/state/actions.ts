@@ -52,8 +52,9 @@ export function createActions(store: AppStore) {
     /** «Забрал»: claimed + при autoApplyClaims запись в леджер (5.1). */
     async claim(model: Model, occ: Occurrence, actual?: Reward) {
       const at = nowIso(store);
+      // у трекеров сумма уже в кошельке через записи прогресса — отметка меняет только статус
       const res = claimOccurrence(occ, at, {
-        autoApply: model.settings.autoApplyClaims,
+        autoApply: model.settings.autoApplyClaims && !occ.tracker,
         ...(actual ? { actual } : {}),
       });
       await write([
@@ -68,7 +69,7 @@ export function createActions(store: AppStore) {
       const changes: (DocWrite | null)[] = [
         { collection: 'occ_status', id: occ.id, data: { id: occ.id, status } },
       ];
-      if (occ.status === 'claimed' && model.settings.autoApplyClaims) {
+      if (occ.status === 'claimed' && model.settings.autoApplyClaims && !occ.tracker) {
         const res = unclaimOccurrence(occ, at, { autoApply: true });
         if (res.ledger) changes.push({ collection: 'ledger', id: res.ledger.id, data: res.ledger });
       }
