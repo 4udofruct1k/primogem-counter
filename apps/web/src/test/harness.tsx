@@ -21,7 +21,7 @@ export interface Harness {
   calls: string[];
 }
 
-export type Handler = (path: string, init?: RequestInit) => Response | Promise<Response> | undefined;
+export type Handler = (path: string, init?: RequestInit) => Response | undefined | Promise<Response | undefined>;
 
 export function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
