@@ -11,7 +11,8 @@ import { TimelineScreen } from './screens/TimelineScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { VersionScreen } from './screens/VersionScreen';
 import { WalletScreen } from './screens/WalletScreen';
-import { useApp, useServices } from './state/context';
+import { useApp, useModel, useServices } from './state/context';
+import { useNotifier } from './state/notifier';
 import { Button } from './ui/components';
 import { href, useRoute } from './ui/router';
 
@@ -39,6 +40,7 @@ export function App() {
   const error = useApp((s) => s.error);
   const route = useRoute();
   const screen = route.path[0] ?? 'today';
+  useNotifier(useModel());
 
   if (phase === 'loading') return <div className="center">Загрузка…</div>;
   if (phase === 'error')

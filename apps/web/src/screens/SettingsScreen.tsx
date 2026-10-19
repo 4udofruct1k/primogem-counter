@@ -1,7 +1,8 @@
 import type { ServerId } from '@primo/domain';
 import type { Settings } from '@primo/shared';
 import { useActions, useModel, useStoreApi } from '../state/context';
-import { Card, Field, NumberInput, Toggle } from '../ui/components';
+import { notificationsSupported } from '../state/notifier';
+import { Button, Card, Field, NumberInput, Toggle } from '../ui/components';
 import { AccountCard } from './AccountCard';
 
 const SERVERS: [ServerId, string][] = [
@@ -111,8 +112,24 @@ export function SettingsScreen() {
           checked={s.notifications.enabled}
           onChange={(v) => save({ notifications: { ...s.notifications, enabled: v } })}
           label="Напоминать о дедлайнах"
-          hint="Пока вкладка или приложение открыты"
+          hint="Пока вкладка или приложение открыты; всегда — блок «горит» и счётчик на иконке"
         />
+        <Field label="Дедлайны — от скольки примогемов" hint="или любые судьбы">
+          <NumberInput
+            aria-label="Порог напоминаний"
+            value={s.notifications.minPrimo}
+            min={0}
+            step={50}
+            onChange={(v) =>
+              save({ notifications: { ...s.notifications, minPrimo: Math.max(0, Math.floor(v)) } })
+            }
+          />
+        </Field>
+        {notificationsSupported() && Notification.permission !== 'granted' && (
+          <Button onClick={() => void Notification.requestPermission()}>
+            Разрешить уведомления браузера
+          </Button>
+        )}
       </Card>
     </>
   );
