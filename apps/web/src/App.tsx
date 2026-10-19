@@ -1,10 +1,13 @@
 import { useEffect, type ReactNode } from 'react';
+import { AdminScreen } from './screens/AdminScreen';
 import { EndgameScreen } from './screens/EndgameScreen';
 import { ForecastScreen } from './screens/ForecastScreen';
 import { MoreScreen } from './screens/MoreScreen';
 import { Placeholder } from './screens/Placeholder';
 import { RegionsScreen } from './screens/RegionsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { SourcesScreen } from './screens/SourcesScreen';
+import { TimelineScreen } from './screens/TimelineScreen';
 import { TodayScreen } from './screens/TodayScreen';
 import { VersionScreen } from './screens/VersionScreen';
 import { WalletScreen } from './screens/WalletScreen';
@@ -86,13 +89,13 @@ function renderScreen(screen: string): ReactNode {
     case 'version':
       return <VersionScreen />;
     case 'timeline':
-      return <Placeholder title="Таймлайн" />;
+      return <TimelineScreen />;
     case 'wishes':
       return <Placeholder title="Молитвы" />;
     case 'sources':
-      return <Placeholder title="Источники и оплата" />;
+      return <SourcesScreen />;
     case 'admin':
-      return <Placeholder title="Админка данных" />;
+      return <AdminScreen />;
     default:
       return <Placeholder title="Нет такой страницы" />;
   }
