@@ -2,6 +2,7 @@
 import { parseEndgameConfig, type EndgameConfig } from './endgame';
 import {
   addRewards,
+  clone,
   exceeds,
   hasNull,
   rewardEquals,
@@ -124,7 +125,7 @@ const CATEGORY_FIELDS = [
 /** Оставляет только поля CategoryDef (служебные поля seed вроде `totalNow` отбрасываются — считаем сами). */
 function pickCategory(c: Record<string, unknown>): CategoryDef {
   const out: Record<string, unknown> = {};
-  for (const k of CATEGORY_FIELDS) if (c[k] !== undefined && c[k] !== null) out[k] = structuredClone(c[k]);
+  for (const k of CATEGORY_FIELDS) if (c[k] !== undefined && c[k] !== null) out[k] = clone(c[k]);
   if (!('total' in out)) out.total = null;
   return out as unknown as CategoryDef;
 }
@@ -469,7 +470,7 @@ export function addChest(
   const key = String(variant);
   const current = progress.chestCounts?.[type.id]?.[key] ?? 0;
   if (current + delta < 0) return progress;
-  const counts = structuredClone(progress.chestCounts ?? {});
+  const counts = clone(progress.chestCounts ?? {});
   counts[type.id] = { ...counts[type.id], [key]: current + delta };
   const log = [...(progress.chestLog ?? []), { type: type.id, variant, delta, at }].slice(-CHEST_LOG_LIMIT);
   return { ...progress, chestCounts: counts, chestLog: log, updatedAt: at };
@@ -481,7 +482,7 @@ export function undoLastChest(progress: CategoryProgress, at?: ISO): CategoryPro
   const last = log.at(-1);
   if (!last) return progress;
   const key = String(last.variant);
-  const counts = structuredClone(progress.chestCounts ?? {});
+  const counts = clone(progress.chestCounts ?? {});
   const value = Math.max(0, (counts[last.type]?.[key] ?? 0) - last.delta);
   counts[last.type] = { ...counts[last.type], [key]: value };
   return {

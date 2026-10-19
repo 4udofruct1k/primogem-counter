@@ -14,3 +14,4 @@ export * from './regions';
 export * from './onetime';
 export * from './forecast';
 export * from './pity';
+export * from './patch';

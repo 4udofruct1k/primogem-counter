@@ -1,4 +1,5 @@
 // Переопределения пользователя и мердж датапака (I6, раздел 16): Override > новый пак > старый пак > проекция.
+import { clone } from './reward';
 import { ms } from './time';
 import type { Override } from './types';
 
@@ -20,7 +21,7 @@ export function applyOverrides<T extends { id: string }>(
   return items.map((item) => {
     const own = relevant.filter((o) => o.id === item.id);
     if (own.length === 0) return item;
-    const copy = structuredClone(item);
+    const copy = clone(item);
     for (const o of own) setPath(copy as Record<string, unknown>, o.field, o.value);
     return copy;
   });
@@ -34,5 +35,5 @@ function setPath(target: Record<string, unknown>, path: string, value: unknown) 
     if (typeof next !== 'object' || next === null) obj[k] = {};
     obj = obj[k] as Record<string, unknown>;
   }
-  obj[keys.at(-1)!] = structuredClone(value);
+  obj[keys.at(-1)!] = clone(value);
 }

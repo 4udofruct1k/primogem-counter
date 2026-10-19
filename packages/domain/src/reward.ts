@@ -72,3 +72,8 @@ function normalize(r: Reward): Reward {
   }
   return r;
 }
+
+/** Глубокая копия JSON-совместимых данных (документы и игровые данные). */
+export function clone<T>(value: T): T {
+  return value === undefined ? value : (JSON.parse(JSON.stringify(value)) as T);
+}
