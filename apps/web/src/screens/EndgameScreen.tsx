@@ -36,9 +36,8 @@ function currentCycle(model: Model, ruleId: string): Occurrence | undefined {
 }
 
 function pastCycles(model: Model, ruleId: string): Occurrence[] {
-  const now = ms(model.now);
-  return model.occurrences
-    .filter((o) => o.ruleId === ruleId && o.deadline && ms(o.deadline) <= now)
+  return model.trackerHistory
+    .filter((o) => o.ruleId === ruleId)
     .sort((a, b) => ms(b.from) - ms(a.from))
     .slice(0, 6);
 }

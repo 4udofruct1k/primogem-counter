@@ -4,6 +4,7 @@ import { useActions, useModel, useStoreApi } from '../state/context';
 import { notificationsSupported } from '../state/notifier';
 import { Button, Card, Field, NumberInput, Toggle } from '../ui/components';
 import { AccountCard } from './AccountCard';
+import { BackupCard } from './BackupCard';
 
 const SERVERS: [ServerId, string][] = [
   ['europe', 'Europe (UTC+1)'],
@@ -22,6 +23,7 @@ export function SettingsScreen() {
   return (
     <>
       <AccountCard />
+      <BackupCard />
       <Card title="Игра">
         <Field label="Сервер" hint="Смена сервера перерезолвит время; отметки и прогресс сохраняются">
           <select

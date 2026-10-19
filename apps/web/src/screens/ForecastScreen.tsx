@@ -45,10 +45,14 @@ export function ForecastScreen() {
   const [editGoal, setEditGoal] = useState<Goal | 'new' | null>(null);
 
   const goal = route.query.get('goal') ? (goals[route.query.get('goal')!] as Goal | undefined) : undefined;
+  // цель по баннеру, которого больше нет в данных, — прогноз к цели по умолчанию и предупреждение
+  const goalAt = model && goal ? goalTarget(model, goal) : null;
+  const lostGoal = !!goal && !goalAt;
   const target: ISO | null = model
-    ? goal
-      ? goalTarget(model, goal)
-      : (validT(route.query.get('t')) ?? model.currentVersion?.endDeadline ?? addDays(model.now, 30))
+    ? (goalAt ??
+      (goal ? null : validT(route.query.get('t'))) ??
+      model.currentVersion?.endDeadline ??
+      addDays(model.now, 30))
     : null;
 
   const results = useMemo(() => {
@@ -74,6 +78,9 @@ export function ForecastScreen() {
         goalId={goal?.id ?? null}
         onEditGoal={setEditGoal}
       />
+      {lostGoal && (
+        <p className="warn">Баннер цели не найден в данных — прогноз к концу версии. Измените цель.</p>
+      )}
       {pastTarget && <p className="warn">Цель уже в прошлом — прогноз равен текущему балансу.</p>}
       <Card title={`К ${dateTime(target)}`}>
         <div className="scenario-tiles">

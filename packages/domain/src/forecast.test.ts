@@ -138,6 +138,21 @@ describe('forecast: сценарии (8.2)', () => {
     expect(r.contributions.find((c) => c.id === 'abyss:2026-10')!.reward).toEqual({ primo: 200 });
   });
 
+  it('платное: покупка луны на будущую дату в Минимум не входит, в Ожидаемо — входит', () => {
+    const payment: PaymentProfile = {
+      welkinPurchases: [{ id: 'f1', at: '2026-11-10T05:00:00Z' }],
+      welkinPlanned: 'none',
+      bpPaid: 'never',
+      plannedTopUps: [],
+    };
+    const occs = applyStatuses(occurrences({ payment }), [], NOW).occurrences;
+    const T = '2027-01-31T00:00:00Z';
+    const ids = (scenario: 'min' | 'expected') =>
+      run({ occurrences: occs, payment, target: T, scenario }).contributions.map((c) => c.id);
+    expect(ids('min').some((id) => id.startsWith('welkin:f1:'))).toBe(false);
+    expect(ids('expected')).toContain('welkin:f1:d0');
+  });
+
   it('платное: Минимум — только купленное', () => {
     const payment: PaymentProfile = {
       welkinPurchases: [{ id: 'p1', at: NOW }],

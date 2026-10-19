@@ -333,7 +333,7 @@ function materializeSubscription(ctx: RuleContext, s: Extract<Schedule, { kind: 
     const startDate = state.activeEnd && state.activeEnd >= date ? addDaysToDate(state.activeEnd, 1) : date;
     const remainingAfter = daysInclusive(date, addDaysToDate(startDate, s.days - 1));
     if (remainingAfter > s.maxDays) return false;
-    const extra: Partial<Occurrence> = virtual ? { virtual: true } : {};
+    const extra: Partial<Occurrence> = virtual ? { virtual: true } : { purchasedAt: at };
     ctx.push(
       occurrence(ctx, `${rule.id}:${purchaseId}:buy`, at, undefined, {
         ...extra,

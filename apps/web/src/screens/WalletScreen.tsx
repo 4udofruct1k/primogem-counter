@@ -1,4 +1,4 @@
-import { limitedPulls, ms, standardPulls, type LedgerEntry } from '@primo/domain';
+import { limitedPulls, ms, standardPulls, type LedgerEntry, type WalletSnapshot } from '@primo/domain';
 import { useState } from 'react';
 import { useActions, useApp, useModel } from '../state/context';
 import { Button, Card, Empty, Field, NumberInput, Stat } from '../ui/components';
@@ -23,7 +23,9 @@ export function WalletScreen() {
   if (!model) return null;
   const b = model.balance;
   const entries = (Object.values(ledger) as LedgerEntry[]).sort((x, y) => ms(y.at) - ms(x.at)).slice(0, 100);
-  const lastSnap = Object.values(snapshots).length;
+  const snaps = (Object.entries(snapshots) as [string, WalletSnapshot][]).sort(
+    ([, x], [, y]) => ms(y.at) - ms(x.at),
+  );
 
   return (
     <>
@@ -48,8 +50,7 @@ export function WalletScreen() {
           Pity: персонаж {model.pity.char}
           {model.pity.charGuaranteed ? ' (гарант)' : ''}, сияние {model.pity.radiance}; оружие{' '}
           {model.pity.weapon}
-          {model.pity.weaponGuaranteed ? ' (гарант 75/25)' : ''}, очко {model.pity.weaponFatePoint}. Снимков:{' '}
-          {lastSnap}.
+          {model.pity.weaponGuaranteed ? ' (гарант 75/25)' : ''}, очко {model.pity.weaponFatePoint}.
         </p>
       </Card>
 
@@ -89,6 +90,28 @@ export function WalletScreen() {
         )}
       </Card>
       <ReconcileSheet open={reconcile} onClose={() => setReconcile(false)} />
+      <Card title={`Снимки — ${snaps.length}`}>
+        {snaps.length === 0 ? (
+          <Empty>Снимков нет — нажмите «Сверка», чтобы ввести реальные цифры.</Empty>
+        ) : (
+          <ul className="list" data-testid="snapshots">
+            {snaps.slice(0, 50).map(([id, sn], i) => (
+              <li key={id} className="row">
+                <div className="row-main">
+                  <div className="row-title">
+                    {dateTime(sn.at)}
+                    {i === 0 ? ' · от него считается баланс' : ''}
+                  </div>
+                  <div className="row-sub">
+                    {rewardText(sn, '0')} · pity {sn.pity.char}
+                    {sn.pity.charGuaranteed ? ' (гарант)' : ''} / {sn.pity.weapon}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </>
   );
 }

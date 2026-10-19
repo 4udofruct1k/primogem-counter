@@ -60,6 +60,9 @@ export const ZERO_PITY: Pity = {
   weaponFatePoint: 0,
 };
 
+/** Глубина истории эндгейма: больше 3 циклов натиска (≈ 3 версии по 42 дня). */
+export const TRACKER_HISTORY_DAYS = 200;
+
 export interface Model {
   now: ISO;
   deviceOffset: number;
@@ -84,6 +87,8 @@ export interface Model {
   pity: Pity;
   /** Суммы трекеров по id цикла. */
   trackerSums: Record<string, number>;
+  /** Прошедшие циклы эндгейма (бездна, театр, натиск) за TRACKER_HISTORY_DAYS — по времени. */
+  trackerHistory: Occurrence[];
   expectations: Record<string, { expected: Reward; expectedMin: Reward }>;
   oneTime: OneTimeUnit[];
 }
@@ -112,7 +117,7 @@ export function computeModel(game: GameData, docs: DocsState, now: ISO, deviceOf
   const calc: CalcContext = { chestTypes, schedules: seed.schedules };
   const ctxForArea = (areaId: string) => areaContext(calc, areaId, overrides);
 
-  const materialized = materialize({
+  const input = {
     now,
     server,
     versions,
@@ -123,20 +128,33 @@ export function computeModel(game: GameData, docs: DocsState, now: ISO, deviceOf
     newContentVersions: newContentVersions(seed),
     eventTemplate: pack.eventTemplate,
     settings: { claimLagHours: settings.claimLagHours, stardustShop: settings.stardustShop },
-  });
+  };
+  const materialized = materialize(input);
   const { occurrences, autoMissed } = applyStatuses(materialized, docs.occ_status, now);
+  // прошедшие циклы эндгейма глубже горизонта вхождений: «среднее за 3 цикла» и «История» (6, 10.5)
+  const trackerHistory = materialize({
+    ...input,
+    rules: rules.filter((r) => r.tracker && r.tracker !== 'hoyolab'),
+    horizon: { from: addDays(now, -TRACKER_HISTORY_DAYS), to: now },
+  })
+    .filter((o) => o.deadline && ms(o.deadline) <= ms(now))
+    .sort((a, b) => ms(a.from) - ms(b.from));
 
   const snapshots = Object.values(docs.wallet_snapshot);
   const wallet = currentBalance(snapshots, Object.values(docs.ledger));
   const { at: _at, pity, ...balance } = wallet;
 
-  const trackerSums = computeTrackerSums(occurrences, docs, seed);
+  const known = new Set(occurrences.map((o) => o.id));
+  const trackerSums = computeTrackerSums(
+    [...trackerHistory.filter((o) => !known.has(o.id)), ...occurrences],
+    docs,
+    seed,
+  );
   const expectations: Model['expectations'] = {};
   for (const rule of rules) {
     if (!rule.tracker || rule.tracker === 'hoyolab') continue;
-    const history = occurrences
-      .filter((o) => o.ruleId === rule.id && o.deadline && ms(o.deadline) <= ms(now) && o.id in trackerSums)
-      .sort((a, b) => ms(a.from) - ms(b.from))
+    const history = trackerHistory
+      .filter((o) => o.ruleId === rule.id && o.id in trackerSums)
       .map((o) => trackerSums[o.id]!);
     const mode = (settings.expectations[rule.id] as ExpectationMode | undefined) ?? { mode: 'pack' };
     expectations[rule.id] = trackerExpectation(rule, mode, history);
@@ -173,6 +191,7 @@ export function computeModel(game: GameData, docs: DocsState, now: ISO, deviceOf
     balance,
     pity: pity ?? ZERO_PITY,
     trackerSums,
+    trackerHistory,
     expectations,
     oneTime,
   };

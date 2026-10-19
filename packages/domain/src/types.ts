@@ -107,6 +107,8 @@ export interface Occurrence {
   tracker?: TrackerKind;
   /** Виртуальная покупка луны (welkinPlanned = 'keepActive'). */
   virtual?: boolean;
+  /** Момент покупки луны, к которой относится день (8.2: «Минимум — только купленное»). */
+  purchasedAt?: ISO;
   from: ISO;
   deadline?: ISO;
   expectedClaimAt: ISO;

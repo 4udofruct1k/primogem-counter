@@ -269,6 +269,8 @@ function occurrenceValue(o: Occurrence, input: ForecastInput): Reward | null {
   if (o.paid && scenario === 'min') {
     // Минимум — только купленное: реальные покупки луны и БП уже начавшихся версий
     if (o.virtual) return null;
+    // покупка луны, записанная на будущую дату, ещё не совершена
+    if (o.purchasedAt && ms(o.purchasedAt) > ms(now)) return null;
     if (o.ruleId === 'bp_paid' && ms(o.from) > ms(now)) return null;
   }
   if (o.tracker && o.ruleId) {

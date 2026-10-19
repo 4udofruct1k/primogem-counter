@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { makeHarness } from '../test/harness';
 import { date, dateTime, isIso, localDayToIso } from '../ui/format';
 import { createActions } from './actions';
+import { makeBackup, readBackup } from './backup';
 import { computeModel, DEFAULT_PAYMENT } from './model';
 import { hotItems } from './select';
 
@@ -76,7 +77,7 @@ describe('своя цена сундуков области (11.2)', () => {
     const local = m.ctxForArea(area.id).chestTypes.find((t) => t.id === type.id)!;
     const cat = area.categories.find((c) => c.kind === 'chests')!;
     const [button] = chestButtons(local, area.chestBracket);
-    const next = addChest({ categoryId: cat.id }, area, local, button!.variant, 1, s.now);
+    const next = addChest({ categoryId: cat.id, updatedAt: s.now }, area, local, button!.variant, 1, s.now);
     await actions.saveProgress(m, cat, area, next);
     // в кошелёк — цена области (1000), а не глобальная
     const ledger = Object.values(h.store.getState().docs.ledger);
@@ -89,5 +90,42 @@ describe('своя цена сундуков области (11.2)', () => {
     expect((withArea.collected.primo ?? 0) - (global.collected.primo ?? 0)).toBe(
       1000 - chestButtons(type, area.chestBracket).find((b) => b.variant === button!.variant)!.price,
     );
+  });
+});
+
+describe('бэкап и импорт (10.10)', () => {
+  it('бэкап гостя импортируется в чистый браузер, мусор пропускается', async () => {
+    const a = await makeHarness();
+    await createActions(a.store).manualEntry({ primo: 160 });
+    await createActions(a.store).saveSettings({ server: 'asia' });
+    const file = makeBackup(a.store.getState().docs, '2026-10-19T05:00:00Z');
+    const text = JSON.stringify({
+      ...file,
+      docs: [
+        ...file.docs,
+        { collection: 'nope', id: 'x', data: {} },
+        { collection: 'ledger', id: 'bad', data: { at: 1 } },
+      ],
+    });
+    const parsed = readBackup(text);
+    if ('error' in parsed) throw new Error(parsed.error);
+    expect(parsed.skipped).toBe(2);
+    const b = await makeHarness();
+    await b.store.getState().write(parsed.writes);
+    const docs = b.store.getState().docs;
+    expect(Object.values(docs.ledger).map((e) => e.delta.primo)).toEqual([160]);
+    expect(docs.settings.main?.server).toBe('asia');
+    expect(readBackup('{')).toEqual({ error: 'Это не JSON' });
+  });
+});
+
+describe('история эндгейма (6, 10.5)', () => {
+  it('прошедшие циклы — глубже 42 дней, для «среднего за 3 цикла»', async () => {
+    const h = await makeHarness();
+    const s = h.store.getState();
+    const m = computeModel(s.game!, s.docs, s.now, 5);
+    const abyss = m.trackerHistory.filter((o) => o.tracker === 'abyss').map((o) => o.id);
+    expect(abyss.length).toBeGreaterThanOrEqual(3);
+    expect(m.trackerHistory.every((o) => Date.parse(o.deadline!) <= Date.parse(s.now))).toBe(true);
   });
 });
