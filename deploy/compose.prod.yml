@@ -44,7 +44,9 @@ services:
       - webdist:/out
 
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: .
+      dockerfile: caddy.Dockerfile
     restart: unless-stopped
     environment:
       DOMAIN: ${DOMAIN}
@@ -53,7 +55,6 @@ services:
       - '443:443'
       - '443:443/udp'
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - webdist:/srv/web:ro
       - ../data:/srv/data:ro
       - caddy_data:/data
@@ -66,7 +67,9 @@ services:
     networks: [primo]
 
   backup:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: backup.Dockerfile
     restart: unless-stopped
     environment:
       PGHOST: db
@@ -76,9 +79,7 @@ services:
       # POSIX TZ: UTC+5 (Уфа) без tzdata — cron в 04:30 по местному
       TZ: UTC-5
     volumes:
-      - ./backup.sh:/usr/local/bin/backup.sh:ro
       - ./backups:/backups
-    entrypoint: ['/bin/sh', '-c', 'echo "30 4 * * * /usr/local/bin/backup.sh" > /etc/crontabs/root && exec crond -f -l 8']
     depends_on:
       db:
         condition: service_healthy

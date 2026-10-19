@@ -1,0 +1,4 @@
+# контекст сборки caddy и backup — только их файлы (не .env и не дампы)
+*
+!Caddyfile
+!backup.sh
