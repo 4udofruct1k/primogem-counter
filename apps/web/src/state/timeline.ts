@@ -26,6 +26,8 @@ export interface TimelineItem {
   to?: ISO;
   tone: Tone;
   occ?: Occurrence;
+  /** Ещё вхождения той же полосы (у БП — бесплатная и платная ветки). */
+  extraOccIds?: string[];
   /** Маркер внутри полосы (закрытие покупки БП). */
   marker?: { at: ISO; label: string };
   reward?: Reward;
@@ -178,6 +180,8 @@ export function buildTimeline(
       tone: v.confidence === 'projected' ? 'projected' : 'neutral',
       marker: { at: v.bpPurchaseEnd, label: 'закрытие покупки' },
       occ: bp,
+      // в шторке — обе ветки: бесплатные AF тоже отмечаются здесь
+      extraOccIds: [`bp_paid:${v.id}`, `bp_free:${v.id}`].filter((id) => id !== bp.id),
     });
   }
 

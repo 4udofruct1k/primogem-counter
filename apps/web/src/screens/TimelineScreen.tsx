@@ -260,7 +260,7 @@ function Axis({ start, width, px, zoom }: { start: number; width: number; px: nu
 function ItemSheet({ model, item, onClose }: { model: Model; item: TimelineItem; onClose: () => void }) {
   // свежие статусы из модели (после отметки в шторке)
   const occs = item.occ
-    ? model.occurrences.filter((o) => o.id === item.occ!.id)
+    ? model.occurrences.filter((o) => o.id === item.occ!.id || item.extraOccIds?.includes(o.id))
     : item.id.startsWith('e:')
       ? model.occurrences.filter((o) => o.eventId === item.id.slice(2))
       : [];
