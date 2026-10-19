@@ -49,7 +49,14 @@ function RegionList({ model }: { model: Model }) {
   const regionStates = useRegionStates();
   const summaries = model.seed.regions.map((r) => ({
     region: r,
-    s: regionSummary(r, progress, areaStates, regionStates[r.id]?.closed ?? false, model.calc),
+    s: regionSummary(
+      r,
+      progress,
+      areaStates,
+      regionStates[r.id]?.closed ?? false,
+      model.calc,
+      model.ctxForArea,
+    ),
   }));
   const general = model.seed.general.map((g) =>
     categorySummary(g, progress[g.id], areaFlags(areaStates[g.id], false), model.calc),
@@ -240,11 +247,7 @@ function AreaView({
             hint={regionClosed ? 'закрыт весь регион' : undefined}
           />
         </div>
-        <PlanEditor
-          plan={current.plan}
-          onChange={(plan) => saveState({ ...current, plan })}
-          offset={model.deviceOffset}
-        />
+        <PlanEditor plan={current.plan} onChange={(plan) => saveState({ ...current, plan })} />
         <div className="btn-row">
           <Button small variant="ghost" onClick={() => setAddCat(true)}>
             + категория
@@ -292,15 +295,7 @@ function AreaView({
   );
 }
 
-function PlanEditor({
-  plan,
-  onChange,
-  offset,
-}: {
-  plan: AreaPlan;
-  onChange: (p: AreaPlan) => void;
-  offset: number;
-}) {
+function PlanEditor({ plan, onChange }: { plan: AreaPlan; onChange: (p: AreaPlan) => void }) {
   return (
     <div className="grid2">
       <Field label="План в прогнозе" hint="Учитывается в «Ожидаемо» и «Максимум»">
@@ -326,7 +321,7 @@ function PlanEditor({
         </select>
       </Field>
       {plan.kind === 'byDate' && (
-        <Field label="Дата" hint={date(plan.at, offset)}>
+        <Field label="Дата" hint={date(plan.at)}>
           <input
             className="input"
             type="date"
@@ -372,7 +367,6 @@ function GeneralSources({ model }: { model: Model }) {
             />
             <PlanEditor
               plan={state.plan}
-              offset={model.deviceOffset}
               onChange={(plan) =>
                 actions.saveAreaState(model, { id: g.id, categories: [g] }, { ...state, plan })
               }

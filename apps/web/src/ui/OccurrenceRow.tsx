@@ -48,8 +48,8 @@ export function OccurrenceRow({ model, occ, compact }: { model: Model; occ: Occu
         </div>
         {!compact && (
           <div className="row-sub">
-            {dateTime(occ.from, model.deviceOffset)}
-            {occ.deadline ? ` → ${dateTime(occ.deadline, model.deviceOffset)}` : ''}
+            {dateTime(occ.from)}
+            {occ.deadline ? ` → ${dateTime(occ.deadline)}` : ''}
             {occ.status === 'planned' && occ.deadline ? (
               <span className={hot ? 'hot' : ''}> · осталось {untilText(occ.deadline, model.now)}</span>
             ) : null}

@@ -109,7 +109,9 @@ function ChestsEditor({ cat, area, progress, flags, ctx, now, onSave }: EditorPr
   const p = progress ?? blank(cat, now());
   const bracket = area?.chestBracket ?? 'high';
   const known = cat.chestCounts;
+  // закрытая область: показан максимум, ручной прогресс не трогаем (I9, D-503)
   const click = (typeId: string, variant: ChestVariant, delta: 1 | -1) => {
+    if (flags.closed) return;
     const type = ctx.chestTypes.find((t) => t.id === typeId)!;
     onSave(addChest(p, { chestBracket: bracket }, type, variant, delta, now()));
   };
@@ -142,7 +144,7 @@ function ChestsEditor({ cat, area, progress, flags, ctx, now, onSave }: EditorPr
                         type="button"
                         className="btn btn-small"
                         aria-label={`${label} −`}
-                        disabled={!counts[key]}
+                        disabled={flags.closed || !counts[key]}
                         onClick={() => click(type.id, b.variant, -1)}
                       >
                         −
@@ -151,6 +153,7 @@ function ChestsEditor({ cat, area, progress, flags, ctx, now, onSave }: EditorPr
                         type="button"
                         className="btn btn-small"
                         aria-label={label}
+                        disabled={flags.closed}
                         onClick={() => click(type.id, b.variant, 1)}
                       >
                         +{b.price} <span className="muted">×{counts[key] ?? 0}</span>
@@ -163,7 +166,11 @@ function ChestsEditor({ cat, area, progress, flags, ctx, now, onSave }: EditorPr
           );
         })}
       </ul>
-      <Button small disabled={!p.chestLog?.length} onClick={() => onSave(undoLastChest(p, now()))}>
+      <Button
+        small
+        disabled={flags.closed || !p.chestLog?.length}
+        onClick={() => onSave(undoLastChest(p, now()))}
+      >
         Отменить последнее
       </Button>
       {known && <p className="hint">Числа сундуков — справочно ({known.source}), не лимит.</p>}
@@ -207,9 +214,11 @@ function AmountEditor({ cat, progress, flags, ctx, now, onSave }: EditorProps) {
               aria-label={`${cat.title}: ${c === 'primo' ? 'всего' : c.toUpperCase()}`}
               value={eff.amount?.[c] ?? 0}
               min={0}
-              onChange={(v) =>
-                onSave({ ...p, amount: { ...p.amount, [c]: Math.max(0, v) }, updatedAt: now() })
-              }
+              disabled={flags.closed}
+              onChange={(v) => {
+                if (!flags.closed)
+                  onSave({ ...p, amount: { ...p.amount, [c]: Math.max(0, v) }, updatedAt: now() });
+              }}
             />
           </label>
         ))}

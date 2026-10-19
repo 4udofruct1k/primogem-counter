@@ -31,6 +31,22 @@ export function AccountCard() {
   const { api, sync: engine } = useServices();
   const [code, setCode] = useState<{ username: string; code: string } | null>(null);
   const [sheet, setSheet] = useState<'password' | 'delete' | null>(null);
+  // выход при неотправленной очереди — только после подтверждения: локальные данные стираются (D-206)
+  const [unsent, setUnsent] = useState<{ all: boolean; count: number } | null>(null);
+
+  const signOut = async (all: boolean, force = false) => {
+    await engine.syncNow();
+    const count = await store.repo.pendingCount();
+    if (count > 0 && !force) {
+      setUnsent({ all, count });
+      return;
+    }
+    setUnsent(null);
+    await (all ? api.logoutAll() : api.logout()).catch(() => undefined);
+    await store.repo.clearUserData();
+    await store.getState().setAccount(null);
+    await store.getState().reloadDocs();
+  };
 
   if (!account) {
     return (
@@ -57,7 +73,7 @@ export function AccountCard() {
               ? `ошибка — ${sync.message ?? ''}`
               : 'готово'}
         {sync.pending ? ` · в очереди ${sync.pending}` : ''}
-        {sync.lastAt ? ` · последняя ${dateTime(sync.lastAt, -new Date().getTimezoneOffset() / 60)}` : ''}
+        {sync.lastAt ? ` · последняя ${dateTime(sync.lastAt)}` : ''}
       </p>
       <div className="btn-row">
         <Button onClick={() => engine.syncNow()}>Синхронизировать</Button>
@@ -72,27 +88,8 @@ export function AccountCard() {
         </Button>
       </div>
       <div className="btn-row">
-        <Button
-          onClick={async () => {
-            await engine.syncNow();
-            await api.logout().catch(() => undefined);
-            await store.repo.clearUserData();
-            await store.getState().setAccount(null);
-            await store.getState().reloadDocs();
-          }}
-        >
-          Выйти
-        </Button>
-        <Button
-          onClick={async () => {
-            await api.logoutAll();
-            await store.repo.clearUserData();
-            await store.getState().setAccount(null);
-            await store.getState().reloadDocs();
-          }}
-        >
-          Выйти на всех устройствах
-        </Button>
+        <Button onClick={() => signOut(false)}>Выйти</Button>
+        <Button onClick={() => signOut(true)}>Выйти на всех устройствах</Button>
         <Button variant="danger" onClick={() => setSheet('delete')}>
           Удалить аккаунт
         </Button>
@@ -105,6 +102,20 @@ export function AccountCard() {
         />
       )}
       {sheet === 'delete' && <DeleteSheet onClose={() => setSheet(null)} />}
+      <Sheet open={!!unsent} onClose={() => setUnsent(null)} title="Не всё отправлено">
+        <p>
+          На сервер не ушло изменений: <b>{unsent?.count}</b> (нет связи или сервер их не принял). После
+          выхода они пропадут с этого устройства.
+        </p>
+        <div className="btn-row">
+          <Button variant="primary" onClick={() => setUnsent(null)}>
+            Остаться
+          </Button>
+          <Button variant="danger" onClick={() => unsent && signOut(unsent.all, true)}>
+            Выйти всё равно
+          </Button>
+        </div>
+      </Sheet>
       <RecoveryCodeSheet value={code} onClose={() => setCode(null)} />
     </Card>
   );
@@ -147,8 +158,11 @@ function GuestCard({ onRegistered }: { onRegistered: (username: string, code: st
       } else {
         const res = await api.recover(username, recovery, password);
         await api.login(username, password);
-        await afterLogin(false);
         onRegistered(username, res.recoveryCode);
+        // данные гостя — тот же вопрос, что и при входе (D-206)
+        const hasLocal = (await store.repo.loadAll()).length > 0;
+        if (hasLocal) setAskMerge(true);
+        else await afterLogin(false);
       }
     } catch (e) {
       setError(errorText(e));

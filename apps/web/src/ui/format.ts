@@ -1,4 +1,4 @@
-import { formatInOffset, type Confidence, type ISO, type Reward } from '@primo/domain';
+import { formatInOffset, fromMs, type Confidence, type ISO, type Reward } from '@primo/domain';
 
 const nf = new Intl.NumberFormat('ru-RU');
 
@@ -21,12 +21,30 @@ export function rewardText(r: Reward | null | undefined, empty = '—'): string 
   return nonZero.length ? nonZero.join(' · ') : empty;
 }
 
-export function dateTime(iso: ISO | null | undefined, offset: number): string {
-  return iso ? formatInOffset(iso, offset, 'dd.MM HH:mm') : '—';
+/** Смещение зоны устройства в момент iso, ч — с летним временем (I1: интерфейс показывает время устройства). */
+export function deviceOffsetAt(iso: ISO): number {
+  return -new Date(iso).getTimezoneOffset() / 60;
 }
 
-export function date(iso: ISO | null | undefined, offset: number, format = 'dd.MM.yyyy'): string {
-  return iso ? formatInOffset(iso, offset, format) : '—';
+export function dateTime(iso: ISO | null | undefined): string {
+  return iso ? formatInOffset(iso, deviceOffsetAt(iso), 'dd.MM HH:mm') : '—';
+}
+
+export function date(iso: ISO | null | undefined, format = 'dd.MM.yyyy'): string {
+  return iso ? formatInOffset(iso, deviceOffsetAt(iso), format) : '—';
+}
+
+/** Дата `yyyy-MM-dd` из поля ввода → момент hh:mm этого дня в зоне устройства (UTC ISO); пусто — null. */
+export function localDayToIso(day: string, hh: number, mm = 0): ISO | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  if (!m) return null;
+  const t = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), hh, mm).getTime();
+  return Number.isNaN(t) ? null : fromMs(t);
+}
+
+/** Канонический момент `YYYY-MM-DDTHH:mm:ssZ` (ссылка `?t=` могла прийти откуда угодно). */
+export function isIso(v: string | null | undefined): v is ISO {
+  return !!v && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(v) && !Number.isNaN(Date.parse(v));
 }
 
 /** «через 2 д 3 ч» / «3 ч 10 мин» / «прошло». */

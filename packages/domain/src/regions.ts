@@ -404,8 +404,12 @@ export function regionSummary(
   areaStates: Record<string, AreaState | undefined>,
   regionClosed: boolean,
   ctx: CalcContext,
+  /** Контекст области (свои цены сундуков, 11.2); по умолчанию — общий `ctx`. */
+  ctxForArea: (areaId: string) => CalcContext = () => ctx,
 ): RegionSummary {
-  const areas = region.areas.map((a) => areaSummary(a, progress, areaStates[a.id], regionClosed, ctx));
+  const areas = region.areas.map((a) =>
+    areaSummary(a, progress, areaStates[a.id], regionClosed, ctxForArea(a.id)),
+  );
   return {
     id: region.id,
     total: addRewards(...areas.map((a) => a.total)),

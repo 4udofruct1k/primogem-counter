@@ -2,6 +2,7 @@ import { hoyolabPrimo, limitedPulls, standardPulls } from '@primo/domain';
 import { useMemo, useState } from 'react';
 import { useActions, useApp, useModel } from '../state/context';
 import { runForecast } from '../state/model';
+import { standaloneReminders } from '../state/reminders';
 import { currentHoyolab, hotItems, todayChecklist } from '../state/select';
 import { Button, Card, Empty, Stat } from '../ui/components';
 import { date, num } from '../ui/format';
@@ -22,6 +23,8 @@ export function TodayScreen() {
   const checklist = todayChecklist(model);
   const hoyolab = currentHoyolab(model);
   const hot = hotItems(model);
+  const reminders = standaloneReminders(model);
+  const hotCount = hot.length + reminders.length;
   const v = model.currentVersion;
   const lab = hoyolab ? (model.trackerSums[hoyolab.id] ?? 0) : 0;
   const checkIns = hoyolab ? (hoyolabDocs[hoyolab.id]?.checkIns ?? 0) : 0;
@@ -52,7 +55,7 @@ export function TodayScreen() {
         </div>
         {v && toVersionEnd && (
           <p className="muted small">
-            К концу версии {v.id} ({date(v.endDeadline, model.deviceOffset, 'dd.MM')}) — около{' '}
+            К концу версии {v.id} ({date(v.endDeadline, 'dd.MM')}) — около{' '}
             <b>{num(toVersionEnd.limitedPulls)}</b> круток. <a href={href('forecast')}>Прогноз →</a>
           </p>
         )}
@@ -101,11 +104,19 @@ export function TodayScreen() {
         )}
       </Card>
 
-      <Card title={`Горит — ${hot.length ? `${hot.length}` : 'ничего'}`}>
-        {hot.length === 0 ? (
+      <Card title={`Горит — ${hotCount ? `${hotCount}` : 'ничего'}`}>
+        {hotCount === 0 ? (
           <Empty>В ближайшие 7 дней ничего не сгорает.</Empty>
         ) : (
           <ul className="list" data-testid="hot-list">
+            {reminders.map((r) => (
+              <li key={r.key} className="row" data-testid="reminder">
+                <div className="row-main">
+                  <div className="row-title hot">{r.title}</div>
+                  <div className="row-sub">{r.body}</div>
+                </div>
+              </li>
+            ))}
             {hot.map((o) => (
               <OccurrenceRow key={o.id} model={model} occ={o} />
             ))}

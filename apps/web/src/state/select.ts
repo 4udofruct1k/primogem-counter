@@ -40,7 +40,8 @@ export function hotItems(model: Model): Occurrence[] {
   const checklist = new Set(todayChecklist(model).map((o) => o.id));
   return model.occurrences
     .filter((o) => {
-      if (o.status !== 'planned' || !o.deadline || checklist.has(o.id)) return false;
+      // виртуальные (запланированные покупки луны) — только для прогноза, отмечать нечего (D-401)
+      if (o.virtual || o.status !== 'planned' || !o.deadline || checklist.has(o.id)) return false;
       const left = ms(o.deadline) - now;
       if (left <= 0 || left > HOT_DAYS * DAY_MS) return false;
       if (ms(o.from) > now) return false;
@@ -55,12 +56,15 @@ export function hotItems(model: Model): Occurrence[] {
     .sort((a, b) => ms(a.deadline!) - ms(b.deadline!));
 }
 
-/** Вхождения версии: по versionId, а ежедневные и ежемесячные — по дате начала внутри версии. */
+/**
+ * Вхождения версии: по versionId, а ежедневные и ежемесячные — по дате начала внутри версии.
+ * Виртуальные (запланированная луна) — только в прогнозе: их нельзя забрать.
+ */
 export function versionOccurrences(model: Model, v: Version): Occurrence[] {
   const start = ms(v.start);
   const end = ms(v.end);
-  return model.occurrences.filter((o) =>
-    o.versionId ? o.versionId === v.id : ms(o.from) >= start && ms(o.from) < end,
+  return model.occurrences.filter(
+    (o) => !o.virtual && (o.versionId ? o.versionId === v.id : ms(o.from) >= start && ms(o.from) < end),
   );
 }
 

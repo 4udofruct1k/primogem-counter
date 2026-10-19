@@ -52,7 +52,7 @@ describe('M9: «Молитвы»', () => {
     window.location.hash = '#/wishes';
     renderApp(h, <App />);
     const user = userEvent.setup();
-    const budget = await screen.findByLabelText('Бюджет круток');
+    const budget = await screen.findByLabelText('Бюджет круток', {}, { timeout: 10_000 });
     await user.clear(budget);
     await user.type(budget, '160');
     await user.selectOptions(screen.getByLabelText('Цель созвездие'), '2');

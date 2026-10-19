@@ -173,6 +173,7 @@ export function NumberInput({
   min?: number;
   max?: number;
   step?: number;
+  disabled?: boolean;
   'aria-label'?: string;
 }) {
   return (

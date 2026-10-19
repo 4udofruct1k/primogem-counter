@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useActions, useModel, useStoreApi } from '../state/context';
 import type { Model } from '../state/model';
 import { Badge, Button, Card, ConfidenceBadge, Field, NumberInput, Toggle } from '../ui/components';
-import { date, rewardText } from '../ui/format';
+import { date, localDayToIso, rewardText } from '../ui/format';
 
 export function SourcesScreen() {
   const model = useModel();
@@ -25,13 +25,13 @@ function usePayment(model: Model) {
 }
 
 /** Полдень выбранной даты в зоне устройства → UTC ISO. */
-function dayToIso(day: string, offset: number): string {
-  return new Date(Date.parse(`${day}T12:00:00Z`) - offset * 3_600_000).toISOString();
+function dayToIso(day: string): string {
+  return localDayToIso(day, 12) ?? new Date().toISOString();
 }
 
 function WelkinCard({ model }: { model: Model }) {
   const save = usePayment(model);
-  const [day, setDay] = useState(date(model.now, model.deviceOffset, 'yyyy-MM-dd'));
+  const [day, setDay] = useState(date(model.now, 'yyyy-MM-dd'));
   const purchases = [...model.payment.welkinPurchases].sort((a, b) => ms(a.at) - ms(b.at));
   const lastDay = model.occurrences
     .filter((o) => o.ruleId === 'welkin' && !o.virtual && !o.id.endsWith(':buy'))
@@ -41,18 +41,18 @@ function WelkinCard({ model }: { model: Model }) {
       <p className="small muted">
         300 кристаллов сразу + 90 примогемов в день 30 дней; покупки встают хвостом, не больше 180 дней.
       </p>
-      {lastDay && <p className="small">Активна до {date(lastDay.from, model.deviceOffset)}</p>}
+      {lastDay && <p className="small">Активна до {date(lastDay.from)}</p>}
       <ul className="list">
         {purchases.map((p) => (
           <li key={p.id} className="row">
-            <span className="row-main">Покупка {date(p.at, model.deviceOffset)}</span>
+            <span className="row-main">Покупка {date(p.at)}</span>
             <Button
               small
               variant="ghost"
               onClick={() =>
                 save({ welkinPurchases: model.payment.welkinPurchases.filter((x) => x.id !== p.id) })
               }
-              aria-label={`Удалить покупку ${date(p.at, model.deviceOffset)}`}
+              aria-label={`Удалить покупку ${date(p.at)}`}
             >
               ✕
             </Button>
@@ -76,7 +76,7 @@ function WelkinCard({ model }: { model: Model }) {
                 ...model.payment.welkinPurchases,
                 {
                   id: `p${globalThis.crypto.randomUUID().slice(0, 8)}`,
-                  at: dayToIso(day, model.deviceOffset),
+                  at: dayToIso(day),
                 },
               ],
             })
@@ -128,7 +128,7 @@ function BattlePassCard({ model }: { model: Model }) {
               onChange={(on) =>
                 save({ bpPaid: { versions: on ? [...listed, v.id] : listed.filter((x) => x !== v.id) } })
               }
-              label={`${v.id} (до ${date(v.bpPurchaseEnd, model.deviceOffset, 'dd.MM')})`}
+              label={`${v.id} (до ${date(v.bpPurchaseEnd, 'dd.MM')})`}
             />
           ))}
         </div>
@@ -139,7 +139,7 @@ function BattlePassCard({ model }: { model: Model }) {
 
 function TopUpsCard({ model }: { model: Model }) {
   const save = usePayment(model);
-  const [day, setDay] = useState(date(model.now, model.deviceOffset, 'yyyy-MM-dd'));
+  const [day, setDay] = useState(date(model.now, 'yyyy-MM-dd'));
   const [crystal, setCrystal] = useState(980);
   return (
     <Card title="Плановые пополнения">
@@ -147,7 +147,7 @@ function TopUpsCard({ model }: { model: Model }) {
         {model.payment.plannedTopUps.map((t, i) => (
           <li key={`${t.at}-${i}`} className="row">
             <span className="row-main">
-              {date(t.at, model.deviceOffset)} · {t.crystal} кристаллов
+              {date(t.at)} · {t.crystal} кристаллов
             </span>
             <Button
               small
@@ -181,10 +181,7 @@ function TopUpsCard({ model }: { model: Model }) {
         <Button
           onClick={() =>
             save({
-              plannedTopUps: [
-                ...model.payment.plannedTopUps,
-                { at: dayToIso(day, model.deviceOffset), crystal },
-              ],
+              plannedTopUps: [...model.payment.plannedTopUps, { at: dayToIso(day), crystal }],
             })
           }
         >

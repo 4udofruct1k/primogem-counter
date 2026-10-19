@@ -49,9 +49,8 @@ export function VersionScreen() {
         actions={<ConfidenceBadge c={v.confidence} />}
       >
         <div className="small muted">
-          Старт {dateTime(v.start, model.deviceOffset)} · фаза 2 {dateTime(v.phase2Start, model.deviceOffset)}{' '}
-          · конец БП {dateTime(v.bpEnd, model.deviceOffset)} · дедлайн версии{' '}
-          {dateTime(v.endDeadline, model.deviceOffset)}
+          Старт {dateTime(v.start)} · фаза 2 {dateTime(v.phase2Start)} · конец БП {dateTime(v.bpEnd)} ·
+          дедлайн версии {dateTime(v.endDeadline)}
         </div>
         {banners.length > 0 && (
           <div className="chip-row">

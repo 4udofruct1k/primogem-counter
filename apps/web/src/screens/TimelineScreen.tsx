@@ -98,10 +98,10 @@ export function TimelineScreen() {
           <Toggle checked={showLeaks} onChange={setShowLeaks} label="Показывать утечки" />
           <span className="small muted">Тяните ромб цели — прогноз пересчитается</span>
         </div>
-        <GoalReadout model={model} forecast={goalForecast} />
+        <GoalReadout forecast={goalForecast} />
         <div className="timeline" ref={scroller} data-testid="timeline">
           <div className="timeline-inner" style={{ width: width + LABEL_W }}>
-            <Axis start={start} width={width} px={px} zoom={zoom} offset={model.deviceOffset} />
+            <Axis start={start} width={width} px={px} zoom={zoom} />
             {LANES.map((lane) => {
               const laneItems = items.filter((i) => i.lane === lane.id);
               const rows = stackRows(
@@ -166,7 +166,7 @@ export function TimelineScreen() {
                 className="tl-goal-handle"
                 role="slider"
                 aria-label="Линия цели"
-                aria-valuetext={date(fromMs(targetMs), model.deviceOffset)}
+                aria-valuetext={date(fromMs(targetMs))}
                 aria-valuenow={Math.round((targetMs - ms(model.now)) / DAY_MS)}
                 tabIndex={0}
                 onPointerDown={(e) => {
@@ -212,10 +212,8 @@ export function TimelineScreen() {
 }
 
 function GoalReadout({
-  model,
   forecast,
 }: {
-  model: Model;
   forecast: {
     T: ISO;
     min: { limitedPulls: number };
@@ -226,42 +224,25 @@ function GoalReadout({
   if (!forecast) return <p className="small muted">Линия цели не выбрана.</p>;
   return (
     <p className="small" data-testid="goal-readout">
-      К {date(forecast.T, model.deviceOffset, 'dd.MM.yyyy')}: <b>{num(forecast.exp.limitedPulls)}</b> круток
-      (мин. {num(forecast.min.limitedPulls)}, макс. {num(forecast.max.limitedPulls)}) ·{' '}
+      К {date(forecast.T, 'dd.MM.yyyy')}: <b>{num(forecast.exp.limitedPulls)}</b> круток (мин.{' '}
+      {num(forecast.min.limitedPulls)}, макс. {num(forecast.max.limitedPulls)}) ·{' '}
       <a href={`${href('forecast')}?t=${encodeURIComponent(forecast.T)}`}>подробно →</a>
     </p>
   );
 }
 
-function Axis({
-  start,
-  width,
-  px,
-  zoom,
-  offset,
-}: {
-  start: number;
-  width: number;
-  px: number;
-  zoom: Zoom;
-  offset: number;
-}) {
+function Axis({ start, width, px, zoom }: { start: number; width: number; px: number; zoom: Zoom }) {
   const ticks: { x: number; label: string; major: boolean }[] = [];
   const days = Math.ceil(width / px);
   for (let d = 0; d <= days; d++) {
     const t = start + d * DAY_MS;
     const iso = fromMs(t);
-    const dd = date(iso, offset, 'dd');
-    const show =
-      zoom === 'week'
-        ? true
-        : zoom === 'month'
-          ? new Date(t + offset * 3_600_000).getUTCDay() === 1
-          : dd === '01';
+    const dd = date(iso, 'dd');
+    const show = zoom === 'week' ? true : zoom === 'month' ? new Date(t).getDay() === 1 : dd === '01';
     if (show)
       ticks.push({
         x: d * px,
-        label: zoom === 'version' ? date(iso, offset, 'MM.yy') : date(iso, offset, 'dd.MM'),
+        label: zoom === 'version' ? date(iso, 'MM.yy') : date(iso, 'dd.MM'),
         major: dd === '01',
       });
   }
@@ -286,9 +267,9 @@ function ItemSheet({ model, item, onClose }: { model: Model; item: TimelineItem;
   return (
     <Sheet open onClose={onClose} title={item.label}>
       <p className="small muted">
-        {dateTime(item.from, model.deviceOffset)}
-        {item.to ? ` → ${dateTime(item.to, model.deviceOffset)}` : ''}
-        {item.marker ? ` · ${item.marker.label} ${dateTime(item.marker.at, model.deviceOffset)}` : ''}
+        {dateTime(item.from)}
+        {item.to ? ` → ${dateTime(item.to)}` : ''}
+        {item.marker ? ` · ${item.marker.label} ${dateTime(item.marker.at)}` : ''}
       </p>
       {item.reward && <p>Награда: {rewardText(item.reward)}</p>}
       {item.detail && <p className="small">{item.detail}</p>}

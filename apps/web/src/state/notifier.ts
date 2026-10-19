@@ -25,6 +25,30 @@ export function notificationsSupported(): boolean {
   return typeof window !== 'undefined' && 'Notification' in window;
 }
 
+/**
+ * Показ через service worker: на Android (Chrome и установленная PWA) конструктор `Notification` запрещён.
+ * true — уведомление показано.
+ */
+async function show(title: string, body: string, tag: string): Promise<boolean> {
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg) {
+      await reg.showNotification(title, { body, tag, icon: '/icon-192.png', badge: '/favicon-64.png' });
+      return true;
+    }
+  } catch {
+    // нет сервис-воркера или он не разрешил — пробуем напрямую
+  }
+  try {
+    new Notification(title, { body, tag });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+let delivering = false;
+
 export function useNotifier(model: Model | null) {
   useEffect(() => {
     if (!model) return;
@@ -37,23 +61,28 @@ export function useNotifier(model: Model | null) {
       void (count ? nav.setAppBadge(count) : nav.clearAppBadge?.())?.catch(() => undefined);
 
     if (
+      delivering ||
       !model.settings.notifications.enabled ||
       !notificationsSupported() ||
       Notification.permission !== 'granted'
     )
       return;
-    const sent = readSent();
-    let changed = false;
-    for (const r of dueReminders(model)) {
-      if (sent.has(r.key)) continue;
-      try {
-        new Notification(r.title, { body: r.body, tag: r.key });
-      } catch {
-        // некоторые мобильные браузеры требуют уведомления через service worker — тогда только «горит» и бейдж
+    const due = dueReminders(model);
+    delivering = true;
+    void (async () => {
+      const sent = readSent();
+      let changed = false;
+      for (const r of due) {
+        if (sent.has(r.key)) continue;
+        // отмечаем доставленным только показанное — иначе попробуем при следующем пересчёте
+        if (await show(r.title, r.body, r.key)) {
+          sent.add(r.key);
+          changed = true;
+        }
       }
-      sent.add(r.key);
-      changed = true;
-    }
-    if (changed) writeSent(sent);
+      if (changed) writeSent(sent);
+    })().finally(() => {
+      delivering = false;
+    });
   }, [model]);
 }

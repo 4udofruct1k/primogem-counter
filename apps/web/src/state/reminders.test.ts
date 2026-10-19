@@ -47,3 +47,23 @@ describe('напоминания (раздел 17)', () => {
     expect(keys(await modelAt('2026-10-22T18:00:00Z'))).toContain('stream_codes:7.2:day');
   });
 });
+
+describe('напоминания: правки аудита', () => {
+  it('компенсация по правилу — за 3 дня до 30-го дня письма, а не до конца версии', async () => {
+    // 7.2: старт 03.11 22:00 UTC (у 7.1 своя компенсация ивентом) → письмо живёт до 03.12 22:00
+    expect(keys(await modelAt('2026-12-01T00:00:00Z'))).toContain('maint_comp:7.2:mail');
+    expect(keys(await modelAt('2026-11-28T00:00:00Z'))).not.toContain('maint_comp:7.2:mail');
+    expect(keys(await modelAt('2026-12-04T00:00:00Z'))).not.toContain('maint_comp:7.2:mail');
+  });
+
+  it('«Луна заканчивается» срабатывает и при «держать луну активной»', async () => {
+    const m = await modelAt('2026-11-16T00:00:00Z', async (a) => {
+      await a.savePayment({
+        ...(await import('./model')).DEFAULT_PAYMENT,
+        welkinPurchases: [{ id: 'w1', at: '2026-10-19T07:00:00Z' }],
+        welkinPlanned: 'keepActive',
+      });
+    });
+    expect(keys(m).some((k) => k.startsWith('welkin-end:'))).toBe(true);
+  });
+});

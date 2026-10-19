@@ -79,7 +79,7 @@ export function WalletScreen() {
                 <div className="row-main">
                   <div className="row-title">{REASON[e.reason]}</div>
                   <div className="row-sub">
-                    {dateTime(e.at, model.deviceOffset)} {e.refId ? `· ${e.refId}` : ''}
+                    {dateTime(e.at)} {e.refId ? `· ${e.refId}` : ''}
                   </div>
                 </div>
                 <div className="row-amount">{rewardText(e.delta, '0')}</div>

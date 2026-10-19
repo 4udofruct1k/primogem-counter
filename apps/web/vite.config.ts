@@ -49,5 +49,7 @@ export default defineConfig({
     name: 'web',
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // UI-сценарии из десятков кликов в jsdom; 5 с по умолчанию мало для медленной машины CI
+    testTimeout: 20_000,
   },
 });

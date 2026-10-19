@@ -280,9 +280,13 @@ export function runAll(input: SimInput): RunResult[] {
   return runBatch(input, 0, input.runs);
 }
 
-/** Деление [0, runs) на ≤ parts непустых пакетов почти равного размера (по воркерам). */
+/**
+ * Деление [0, runs) на ≤ parts непустых пакетов почти равного размера (по воркерам).
+ * Дробное число воркеров — вниз, NaN / меньше 1 / не конечное — 1 (D-921): пакеты всегда ровно [0, runs).
+ */
 export function splitRuns(runs: number, parts: number): [number, number][] {
-  const n = Math.max(1, Math.min(parts, runs));
+  const p = Number.isFinite(parts) && parts >= 1 ? Math.floor(parts) : 1;
+  const n = Math.max(1, Math.min(p, runs));
   const out: [number, number][] = [];
   for (let k = 0, from = 0; k < n; k++) {
     const to = from + Math.floor(runs / n) + (k < runs % n ? 1 : 0);

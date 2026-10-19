@@ -297,6 +297,63 @@ describe('gacha/run: пакеты и воспроизводимость', () => 
     ]);
   });
 
+  // число воркеров: дробное — вниз, NaN / меньше 1 / не конечное — 1, больше прогонов — по пакету на прогон (D-921)
+  const ODD_PARTS = [
+    2.5,
+    3.7,
+    0.5,
+    Number.MIN_VALUE,
+    NaN,
+    Infinity,
+    -Infinity,
+    0,
+    -0,
+    -3,
+    -2.5,
+    1,
+    3,
+    8,
+    1e9,
+    Number.MAX_VALUE,
+  ];
+
+  it('splitRuns делит [0, runs) без дыр и выхода за край при любом числе воркеров (D-921)', () => {
+    for (const runs of [1, 2, 7, 10, 10000])
+      for (const parts of ODD_PARTS) {
+        const ranges = splitRuns(runs, parts);
+        const at = `runs ${runs}, parts ${parts}`;
+        expect(ranges.length, at).toBeGreaterThanOrEqual(1);
+        expect(ranges.length, at).toBeLessThanOrEqual(runs);
+        let from = 0;
+        for (const [a, b] of ranges) {
+          expect(Number.isInteger(a) && Number.isInteger(b), at).toBe(true);
+          expect(a, at).toBe(from);
+          expect(b, at).toBeGreaterThan(a);
+          from = b;
+        }
+        expect(from, at).toBe(runs);
+        const sizes = ranges.map(([a, b]) => b - a);
+        expect(Math.max(...sizes) - Math.min(...sizes), at).toBeLessThanOrEqual(1);
+      }
+  });
+
+  it('splitRuns: дробное число воркеров — вниз, NaN / меньше 1 / не конечное — один пакет (D-921)', () => {
+    expect(splitRuns(10, 2.5)).toEqual(splitRuns(10, 2));
+    expect(splitRuns(10, 3.7)).toEqual(splitRuns(10, 3));
+    for (const parts of [NaN, Infinity, -Infinity, 0, -0, -3, 0.5, Number.MIN_VALUE])
+      expect(splitRuns(10, parts), `parts ${parts}`).toEqual([[0, 10]]);
+    expect(splitRuns(3, 1e9)).toEqual(splitRuns(3, 3));
+  });
+
+  it('TC-35: RunResult[] одинаковы при любом числе воркеров, в том числе дробном и NaN', () => {
+    const N = 300;
+    const one = JSON.stringify(runBatch(input, 0, N));
+    for (const parts of ODD_PARTS) {
+      const split = splitRuns(N, parts).flatMap(([from, to]) => runBatch(input, from, to));
+      expect(JSON.stringify(split), `parts ${parts}`).toBe(one);
+    }
+  });
+
   it('неверный ввод — RangeError', () => {
     expect(() => runBatch(simInput({ consTarget: 7 }), 0, 1)).toThrow(RangeError);
     expect(() => runBatch(simInput({ mode: 'weapon_only', refTarget: 0 }), 0, 1)).toThrow(RangeError);

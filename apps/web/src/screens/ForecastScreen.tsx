@@ -27,7 +27,7 @@ import { useActions, useApp, useModel } from '../state/context';
 import { goalNeed, goalPullStats, goalTarget, needLabel } from '../state/goals';
 import { runForecast, type Model } from '../state/model';
 import { Badge, Button, Card, Empty, Field, NumberInput, Sheet, Stat, Tabs } from '../ui/components';
-import { date, dateTime, num, rewardText } from '../ui/format';
+import { date, dateTime, isIso, localDayToIso, num, rewardText } from '../ui/format';
 import { href, navigate, useRoute } from '../ui/router';
 import { useCssVars } from '../ui/useCssVars';
 
@@ -48,7 +48,7 @@ export function ForecastScreen() {
   const target: ISO | null = model
     ? goal
       ? goalTarget(model, goal)
-      : (route.query.get('t') ?? model.currentVersion?.endDeadline ?? addDays(model.now, 30))
+      : (validT(route.query.get('t')) ?? model.currentVersion?.endDeadline ?? addDays(model.now, 30))
     : null;
 
   const results = useMemo(() => {
@@ -75,7 +75,7 @@ export function ForecastScreen() {
         onEditGoal={setEditGoal}
       />
       {pastTarget && <p className="warn">Цель уже в прошлом — прогноз равен текущему балансу.</p>}
-      <Card title={`К ${dateTime(target, model.deviceOffset)}`}>
+      <Card title={`К ${dateTime(target)}`}>
         <div className="scenario-tiles">
           {SCENARIOS.map((s) => (
             <button
@@ -143,7 +143,7 @@ export function ForecastScreen() {
               <li key={`${c.id}-${i}`} className="row">
                 <div className="row-main">
                   <div className="row-title small">{c.title}</div>
-                  <div className="row-sub">{dateTime(c.at, model.deviceOffset)}</div>
+                  <div className="row-sub">{dateTime(c.at)}</div>
                 </div>
                 <span className="row-amount small">{rewardText(c.reward)}</span>
               </li>
@@ -177,7 +177,7 @@ export function ForecastScreen() {
               <li key={d.id} className="row">
                 <div className="row-main">
                   <div className="row-title small">{d.title}</div>
-                  <div className="row-sub">до {dateTime(d.deadline, model.deviceOffset)}</div>
+                  <div className="row-sub">до {dateTime(d.deadline)}</div>
                 </div>
                 <span className="row-amount small">{rewardText(d.reward)}</span>
               </li>
@@ -242,7 +242,7 @@ function GoalPanel({
       <Stat
         label="Дата достижения"
         value={<span data-testid="reach-date">{reach ? reach.split('-').reverse().join('.') : '—'}</span>}
-        sub={reach ? 'худший случай набирается' : `не к ${date(goalTarget(model, goal), model.deviceOffset)}`}
+        sub={reach ? 'худший случай набирается' : `не к ${date(goalTarget(model, goal))}`}
       />
     </div>
   );
@@ -293,11 +293,11 @@ function TargetPicker({
           className="input"
           type="date"
           aria-label="Дата прогноза"
-          value={date(target, model.deviceOffset, 'yyyy-MM-dd')}
-          onChange={(e) =>
-            e.target.value &&
-            set(`${e.target.value}T${String(23 - model.deviceOffset).padStart(2, '0')}:59:00Z`)
-          }
+          value={date(target, 'yyyy-MM-dd')}
+          onChange={(e) => {
+            const t = localDayToIso(e.target.value, 23, 59);
+            if (t) set(t);
+          }}
         />
       </Field>
       <div>
@@ -613,11 +613,11 @@ function GoalSheet({ model, goal, onClose }: { model: Model; goal: Goal | null; 
             className="input"
             type="date"
             aria-label="Дата цели"
-            value={date(at, model.deviceOffset, 'yyyy-MM-dd')}
-            onChange={(e) =>
-              e.target.value &&
-              setAt(`${e.target.value}T${String(23 - model.deviceOffset).padStart(2, '0')}:59:00Z`)
-            }
+            value={date(at, 'yyyy-MM-dd')}
+            onChange={(e) => {
+              const t = localDayToIso(e.target.value, 23, 59);
+              if (t) setAt(t);
+            }}
           />
         </Field>
       )}
@@ -667,4 +667,9 @@ function parseNeed(need: GoalNeed | undefined): {
     cons: c && c.kind === 'char5' ? c.copies - 1 : 0,
     refs: w && w.kind === 'weapon5' ? w.copies : 1,
   };
+}
+
+/** `?t=` из адреса — только канонический момент; иначе цель по умолчанию. */
+function validT(t: string | null): ISO | null {
+  return isIso(t) ? t : null;
 }

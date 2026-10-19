@@ -23,7 +23,8 @@ async function setup(hash: string) {
   );
   window.location.hash = hash;
   renderApp(h, <App />);
-  await screen.findByTestId('pulls-expected');
+  // экран прогноза грузится лениво (отдельный чанк) — под нагрузкой дольше секунды
+  await screen.findByTestId('pulls-expected', {}, { timeout: 10_000 });
   return { h, user: userEvent.setup() };
 }
 

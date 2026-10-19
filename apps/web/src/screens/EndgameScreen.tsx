@@ -63,8 +63,8 @@ function CycleHeader({ model, occ, sum }: { model: Model; occ: Occurrence; sum: 
     <div className="btn-row" style={{ alignItems: 'center', justifyContent: 'space-between' }}>
       <span className="small muted">
         {started ? 'до сброса' : 'начнётся'}{' '}
-        {untilText(started && occ.deadline ? occ.deadline : occ.from, model.now)} ·{' '}
-        {dateTime(occ.from, model.deviceOffset)} → {dateTime(occ.deadline, model.deviceOffset)}
+        {untilText(started && occ.deadline ? occ.deadline : occ.from, model.now)} · {dateTime(occ.from)} →{' '}
+        {dateTime(occ.deadline)}
       </span>
       {occ.status === 'claimed' ? (
         <Button small variant="ghost" onClick={() => actions.setStatus(model, occ, 'planned')}>

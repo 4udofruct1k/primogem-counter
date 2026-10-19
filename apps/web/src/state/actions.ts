@@ -52,6 +52,8 @@ export function createActions(store: AppStore) {
   return {
     /** «Забрал»: claimed + при autoApplyClaims запись в леджер (5.1). */
     async claim(model: Model, occ: Occurrence, actual?: Reward) {
+      // запланированная (виртуальная) луна — ещё не куплена, забирать нечего
+      if (occ.virtual) return;
       const at = nowIso(store);
       // у трекеров сумма уже в кошельке через записи прогресса — отметка меняет только статус
       const res = claimOccurrence(occ, at, {
@@ -146,10 +148,9 @@ export function createActions(store: AppStore) {
             (docs().region_state[area.regionId] as DocOf<'region_state'> | undefined)?.closed ?? false,
           )
         : areaFlags(docs().area_state[cat.id] as AreaState | undefined, false);
-      const delta = subtractRewards(
-        collected(cat, next, flags, model.calc),
-        collected(cat, prev, flags, model.calc),
-      );
+      // свои цены сундуков области (11.2) — тот же контекст, что и на экране области
+      const ctx = area ? model.ctxForArea(area.id) : model.calc;
+      const delta = subtractRewards(collected(cat, next, flags, ctx), collected(cat, prev, flags, ctx));
       await write([
         { collection: 'cat_progress', id: cat.id, data: { ...next, updatedAt: at } },
         model.settings.autoApplyClaims ? progressEntry(cat.id, delta, at) : null,
@@ -169,13 +170,11 @@ export function createActions(store: AppStore) {
         : false;
       const before = areaFlags(prevState, regionClosed);
       const after = areaFlags(next, regionClosed);
+      const ctx = model.ctxForArea(unit.id);
       let delta: Reward = {};
       for (const c of unit.categories) {
         const p = docs().cat_progress[c.id] as CategoryProgress | undefined;
-        delta = addRewards(
-          delta,
-          subtractRewards(collected(c, p, after, model.calc), collected(c, p, before, model.calc)),
-        );
+        delta = addRewards(delta, subtractRewards(collected(c, p, after, ctx), collected(c, p, before, ctx)));
       }
       await write([
         { collection: 'area_state', id: unit.id, data: next },
@@ -192,11 +191,12 @@ export function createActions(store: AppStore) {
         const state = docs().area_state[a.id] as AreaState | undefined;
         const before = areaFlags(state, wasClosed);
         const after = areaFlags(state, closed);
+        const ctx = model.ctxForArea(a.id);
         for (const c of a.categories) {
           const p = docs().cat_progress[c.id] as CategoryProgress | undefined;
           delta = addRewards(
             delta,
-            subtractRewards(collected(c, p, after, model.calc), collected(c, p, before, model.calc)),
+            subtractRewards(collected(c, p, after, ctx), collected(c, p, before, ctx)),
           );
         }
       }
