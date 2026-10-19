@@ -142,10 +142,10 @@ describe('M5: регионы через интерфейс', () => {
     const { h, user } = await open('#/regions/natlan');
     const c = card('natlan_main:statue');
     const sum = () =>
-      ledgerSum(h).reduce((a, d) => ({ primo: a.primo + (d.primo ?? 0), af: a.af + (d.af ?? 0) }), {
-        primo: 0,
-        af: 0,
-      });
+      ledgerSum(h).reduce<{ primo: number; af: number }>(
+        (a, d) => ({ primo: a.primo + (d.primo ?? 0), af: a.af + (d.af ?? 0) }),
+        { primo: 0, af: 0 },
+      );
     await clickTimes(user, c.getByRole('button', { name: 'Статуя (уровни) +' }), 4);
     await waitFor(() => expect(sum()).toEqual({ primo: 300, af: 1 }));
     const before = ledgerSum(h).length;
