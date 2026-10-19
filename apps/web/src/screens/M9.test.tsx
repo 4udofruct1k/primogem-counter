@@ -196,3 +196,28 @@ describe('M9: отклонённые сервером изменения', () =>
     expect(bodies.at(-1)!.changes).toEqual([]);
   });
 });
+
+describe('синхронизация после восстановления БД из бэкапа (D-315)', () => {
+  it('новая эпоха — клиент получает документы, записанные после восстановления, несмотря на курсор', async () => {
+    const server = fakeSyncServer();
+    const mk = async () => {
+      const ds = dataServer({ extra: server.handler });
+      const h = await makeHarness({ server: ds });
+      await h.store
+        .getState()
+        .setAccount({ id: 'u1', username: 'paimon', createdAt: '2026-10-19T00:00:00Z', isAdmin: false });
+      return { h, sync: createSync(h.store, createApi(ds.fetchImpl)) };
+    };
+    const a = await mk();
+    const b = await mk();
+    for (const id of ['g1', 'g2', 'g3'])
+      await a.h.store.getState().put('occ_status', id, { id, status: 'claimed' });
+    await a.sync.syncNow(); // курсор A = 3
+    server.restore(1); // в бэкапе только g1
+    await b.sync.syncNow();
+    await b.h.store.getState().put('occ_status', 'after', { id: 'after', status: 'skipped' }); // seq 2 после восстановления
+    await b.sync.syncNow();
+    await a.sync.syncNow();
+    expect(a.h.store.getState().docs.occ_status.after).toEqual({ id: 'after', status: 'skipped' });
+  });
+});

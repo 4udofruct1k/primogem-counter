@@ -1,5 +1,5 @@
 import type { ServerId } from '@primo/domain';
-import type { Settings } from '@primo/shared';
+import type { ReminderKind, Settings } from '@primo/shared';
 import { useActions, useModel, useStoreApi } from '../state/context';
 import { notificationsSupported } from '../state/notifier';
 import { Button, Card, Field, NumberInput, Toggle } from '../ui/components';
@@ -11,6 +11,17 @@ const SERVERS: [ServerId, string][] = [
   ['asia', 'Asia (UTC+8)'],
   ['tw_hk_mo', 'TW/HK/MO (UTC+8)'],
   ['america', 'America (UTC−5)'],
+];
+
+const REMINDER_LABELS: [ReminderKind, string][] = [
+  ['dailies', 'Дейлики не отмечены — за 3 ч до сброса'],
+  ['welkin', 'Луна не отмечена / заканчивается'],
+  ['deadlines', 'Дедлайн вхождения или ивента — за 24 ч и 3 ч'],
+  ['endgame', 'Бездна и театр не добиты — за 48 ч'],
+  ['stygian', 'Натиск закрывается — за 48 ч'],
+  ['bp', 'Закрытие покупки БП — за 24 ч'],
+  ['stream', 'Спецпрограмма — в день стрима'],
+  ['mail', 'Истечение почты — за 3 дня'],
 ];
 
 export function SettingsScreen() {
@@ -127,6 +138,21 @@ export function SettingsScreen() {
             }
           />
         </Field>
+        <details>
+          <summary className="small muted">Какие напоминания</summary>
+          {REMINDER_LABELS.map(([kind, label]) => (
+            <Toggle
+              key={kind}
+              checked={s.notifications.kinds?.[kind] !== false}
+              onChange={(v) =>
+                save({
+                  notifications: { ...s.notifications, kinds: { ...s.notifications.kinds, [kind]: v } },
+                })
+              }
+              label={label}
+            />
+          ))}
+        </details>
         {notificationsSupported() && Notification.permission !== 'granted' && (
           <Button onClick={() => void Notification.requestPermission()}>
             Разрешить уведомления браузера

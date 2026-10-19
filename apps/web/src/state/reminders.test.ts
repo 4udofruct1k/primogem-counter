@@ -67,3 +67,14 @@ describe('напоминания: правки аудита', () => {
     expect(keys(m).some((k) => k.startsWith('welkin-end:'))).toBe(true);
   });
 });
+
+describe('напоминания по видам (17)', () => {
+  it('выключенный вид не напоминает, остальные работают', async () => {
+    const off = await modelAt('2026-10-20T00:30:00Z', async (a) => {
+      await a.saveSettings({ notifications: { enabled: true, minPrimo: 100, kinds: { dailies: false } } });
+    });
+    expect(keys(off)).not.toContain('daily_commissions:2026-10-19:3h');
+    const on = await modelAt('2026-10-20T00:30:00Z');
+    expect(keys(on)).toContain('daily_commissions:2026-10-19:3h');
+  });
+});

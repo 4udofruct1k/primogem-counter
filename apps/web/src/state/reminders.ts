@@ -1,5 +1,6 @@
 // Напоминания (раздел 17; доставка — 14.7: блок «горит», счётчик на иконке, Notification API при открытой вкладке).
 import { ms, serverDateOf, type Occurrence } from '@primo/domain';
+import type { ReminderKind } from '@primo/shared';
 import type { Model } from './model';
 import { hotItems } from './select';
 
@@ -34,8 +35,9 @@ function rewardBig(o: Occurrence, minPrimo: number): boolean {
 export function dueReminders(model: Model): Reminder[] {
   const now = ms(model.now);
   const out: Reminder[] = [];
-  const add = (key: string, title: string, body: string, at: number, until: number) => {
-    if (now >= at && now < until) out.push({ key, title, body, at });
+  const kinds = model.settings.notifications.kinds ?? {};
+  const add = (kind: ReminderKind, key: string, title: string, body: string, at: number, until: number) => {
+    if (kinds[kind] !== false && now >= at && now < until) out.push({ key, title, body, at });
   };
   const minPrimo = model.settings.notifications.minPrimo;
   const today = serverDateOf(model.now, model.settings.server);
@@ -46,7 +48,7 @@ export function dueReminders(model: Model): Reminder[] {
     if (isMail(o)) {
       // у ивента-письма срок из данных; у правил компенсаций дедлайн — окно получения, письмо живёт 30 дней
       const expiry = o.eventId && o.deadline ? ms(o.deadline) : ms(o.from) + MAIL_LIFE;
-      add(`${o.id}:mail`, 'Почта скоро истечёт', o.title, expiry - 72 * H, expiry);
+      add('mail', `${o.id}:mail`, 'Почта скоро истечёт', o.title, expiry - 72 * H, expiry);
     }
     if (!o.deadline) continue;
     const dl = ms(o.deadline);
@@ -54,12 +56,12 @@ export function dueReminders(model: Model): Reminder[] {
 
     // дейлики не отмечены — за 3 ч до сброса
     if (o.ruleId === 'daily_commissions' && o.id.endsWith(today)) {
-      add(`${o.id}:3h`, 'Дейлики не отмечены', 'До сброса меньше 3 часов', dl - 3 * H, dl);
+      add('dailies', `${o.id}:3h`, 'Дейлики не отмечены', 'До сброса меньше 3 часов', dl - 3 * H, dl);
       continue;
     }
     // луна не отмечена — за 3 ч до сброса (только реальные покупки)
     if (o.ruleId === 'welkin' && !o.virtual && !o.id.endsWith(':buy')) {
-      add(`${o.id}:3h`, 'Луна не отмечена', 'До сброса меньше 3 часов', dl - 3 * H, dl);
+      add('welkin', `${o.id}:3h`, 'Луна не отмечена', 'До сброса меньше 3 часов', dl - 3 * H, dl);
       continue;
     }
     // бездна / театр — за 48 ч, если трекер < ожидания; натиск — за 48 ч, если < 450 (номинал)
@@ -71,6 +73,7 @@ export function dueReminders(model: Model): Reminder[] {
           : (model.expectations[o.ruleId!]?.expected.primo ?? o.expected.primo ?? 0);
       if (sum < goal)
         add(
+          o.tracker === 'stygian' ? 'stygian' : 'endgame',
           `${o.id}:48h`,
           `${o.title}: не добито`,
           `${sum} из ${goal} — до сброса меньше 2 дней`,
@@ -81,8 +84,8 @@ export function dueReminders(model: Model): Reminder[] {
     }
     // дедлайн вхождения/ивента — за 24 ч и за 3 ч (≥ minPrimo примогемов или любые IF)
     if (o.category !== 'daily' && rewardBig(o, minPrimo)) {
-      add(`${o.id}:24h`, 'Сгорает через сутки', o.title, dl - 24 * H, dl - 3 * H);
-      add(`${o.id}:3h`, 'Сгорает через 3 часа', o.title, dl - 3 * H, dl);
+      add('deadlines', `${o.id}:24h`, 'Сгорает через сутки', o.title, dl - 24 * H, dl - 3 * H);
+      add('deadlines', `${o.id}:3h`, 'Сгорает через 3 часа', o.title, dl - 3 * H, dl);
     }
   }
 
@@ -93,21 +96,35 @@ export function dueReminders(model: Model): Reminder[] {
   const lastDay = welkinDays.at(-1);
   if (lastDay?.deadline) {
     const end = ms(lastDay.deadline);
-    add(`welkin-end:${lastDay.id}`, 'Луна заканчивается', 'Осталось меньше 3 дней', end - 72 * H, end);
+    add(
+      'welkin',
+      `welkin-end:${lastDay.id}`,
+      'Луна заканчивается',
+      'Осталось меньше 3 дней',
+      end - 72 * H,
+      end,
+    );
   }
 
   // закрытие покупки БП — за 24 ч до 02:59 server
   if (model.payment.bpPaid !== 'never') {
     for (const v of model.versions) {
       const close = ms(v.bpPurchaseEnd);
-      add(`bp-buy:${v.id}`, 'Закрывается покупка БП', `Версия ${v.id}`, close - 24 * H, close);
+      add('bp', `bp-buy:${v.id}`, 'Закрывается покупка БП', `Версия ${v.id}`, close - 24 * H, close);
     }
   }
 
   // спецпрограмма — в день стрима
   for (const o of model.occurrences) {
     if (o.ruleId === 'stream_codes' && o.status === 'planned' && o.deadline) {
-      add(`${o.id}:day`, 'Сегодня спецпрограмма', 'Коды на 300 примогемов', ms(o.from), ms(o.deadline));
+      add(
+        'stream',
+        `${o.id}:day`,
+        'Сегодня спецпрограмма',
+        'Коды на 300 примогемов',
+        ms(o.from),
+        ms(o.deadline),
+      );
     }
   }
   return out;

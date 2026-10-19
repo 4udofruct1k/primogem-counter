@@ -40,6 +40,11 @@ export class LocalRepo {
     return ((await this.db.meta.get('cursor'))?.value as number | undefined) ?? 0;
   }
 
+  /** Эпоха данных сервера (D-315): сменилась — БД восстановили из бэкапа, курсор недействителен. */
+  async epoch(): Promise<string | undefined> {
+    return (await this.db.meta.get('epoch'))?.value as string | undefined;
+  }
+
   /** «Сохранить в аккаунт»: все локальные документы — в очередь как новые (baseVersion 0). */
   async enqueueAll(at: string): Promise<number> {
     const docs = await this.db.docs.toArray();
@@ -108,11 +113,17 @@ export class LocalRepo {
         if (queued && s && queued.at === s.at) await this.db.queue.delete(key);
         rejected.push({ key, message: r.message });
       }
+      // эпоха сменилась (восстановление из бэкапа): сервер отдаёт всё с начала, версии до восстановления
+      // несравнимы — до последней страницы берём серверные документы без сравнения версий
+      const sentEpoch = await this.epoch();
+      const resync =
+        (!!sentEpoch && !!res.epoch && res.epoch !== sentEpoch) ||
+        !!(await this.db.meta.get('resync'))?.value;
       for (const ch of res.changes) {
         const key = docKey(ch.collection, ch.id);
         if (await this.db.queue.get(key)) continue;
         const doc = await this.db.docs.get(key);
-        if (doc && doc.version >= ch.version) continue;
+        if (doc && !resync && doc.version >= ch.version) continue;
         await this.db.docs.put({
           key,
           collection: ch.collection,
@@ -125,6 +136,8 @@ export class LocalRepo {
         updated.push(key);
       }
       await this.db.meta.put({ key: 'cursor', value: res.cursor });
+      if (res.epoch) await this.db.meta.put({ key: 'epoch', value: res.epoch });
+      await this.db.meta.put({ key: 'resync', value: resync && !!res.more });
     });
     return { conflicts, updated, rejected };
   }
@@ -135,6 +148,8 @@ export class LocalRepo {
       await this.db.docs.clear();
       await this.db.queue.clear();
       await this.db.meta.delete('cursor');
+      await this.db.meta.delete('epoch');
+      await this.db.meta.delete('resync');
       await this.db.meta.delete('account');
     });
   }

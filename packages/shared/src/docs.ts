@@ -1,7 +1,7 @@
 // Документы пользователя по коллекциям (14.3). Схемы общие для клиента и сервера.
 import type * as D from '@primo/domain';
 import { z } from 'zod';
-import { DocIdSchema, IsoSchema, PitySchema, RewardSchema, ServerIdSchema } from './primitives';
+import { DocIdSchema, IsoSchema, maxJson, PitySchema, RewardSchema, ServerIdSchema } from './primitives';
 
 const int = z.number().int();
 const nonNeg = int.min(0);
@@ -44,11 +44,11 @@ const progressFields = {
   levels: z.array(nonNeg).max(50).optional(),
   checked: z.array(z.string().max(300)).max(200).optional(),
   done: z.boolean().optional(),
-  chestCounts: z.record(z.string(), z.record(z.string(), nonNeg)).optional(),
+  chestCounts: z.record(z.string().max(200), z.record(z.string().max(50), nonNeg)).optional(),
   chestLog: z
     .array(
       z.object({
-        type: z.string(),
+        type: z.string().max(200),
         variant: chestVariant,
         delta: z.union([z.literal(1), z.literal(-1)]),
         at: IsoSchema,
@@ -56,7 +56,7 @@ const progressFields = {
     )
     .max(50)
     .optional(),
-  updatedAt: z.string(),
+  updatedAt: z.string().max(64),
 };
 export const CategoryProgressSchema = z.object({
   ...progressFields,
@@ -110,7 +110,7 @@ export const GoalSchema = z.object({
   title: z.string().max(200),
   target: z.discriminatedUnion('kind', [
     z.object({ kind: z.literal('date'), at: IsoSchema }),
-    z.object({ kind: z.literal('banner'), bannerId: z.string(), point: z.enum(['start', 'end']) }),
+    z.object({ kind: z.literal('banner'), bannerId: z.string().max(200), point: z.enum(['start', 'end']) }),
   ]),
   need: GoalNeedSchema,
 });
@@ -130,7 +130,8 @@ export const OverrideSchema = z.object({
   entity: z.string().max(50),
   id: DocIdSchema,
   field: z.string().max(100),
-  value: z.unknown(),
+  /** Новое имя, цена, флаг скрытия — короткие значения (D-312). */
+  value: maxJson(z.unknown(), 4),
   at: IsoSchema,
 });
 
@@ -140,6 +141,19 @@ const expectationMode = z.object({
   min: z.union([z.literal('pack'), z.literal('min3'), nonNeg]).optional(),
 });
 
+/** Виды напоминаний (17): дейлики, луна, дедлайны, бездна/театр, натиск, покупка БП, спецпрограмма, почта. */
+export const REMINDER_KINDS = [
+  'dailies',
+  'welkin',
+  'deadlines',
+  'endgame',
+  'stygian',
+  'bp',
+  'stream',
+  'mail',
+] as const;
+export type ReminderKind = (typeof REMINDER_KINDS)[number];
+
 export const SettingsSchema = z.object({
   server: ServerIdSchema,
   countCrystals: z.boolean(),
@@ -147,19 +161,24 @@ export const SettingsSchema = z.object({
   autoApplyClaims: z.boolean(),
   /** Переопределения claimLagHours по id правила (раздел 6). */
   claimLagHours: z.record(
-    z.string(),
+    z.string().max(200),
     z
       .number()
       .min(0)
       .max(24 * 60),
   ),
   /** Ожидания эндгейма для прогноза по id правила (abyss / theater / stygian). */
-  expectations: z.record(z.string(), expectationMode),
+  expectations: z.record(z.string().max(200), expectationMode),
   /** Темп разового контента, примогемов в неделю (11.6), 0 = выкл. */
   weeklyOneTimePrimo: nonNeg,
   /** Магазин пыли: крутки в месяц (D-104). */
   stardustShop: z.object({ if: int.min(0).max(5), af: int.min(0).max(5) }),
-  notifications: z.object({ enabled: z.boolean(), minPrimo: nonNeg }),
+  notifications: z.object({
+    enabled: z.boolean(),
+    minPrimo: nonNeg,
+    /** Виды напоминаний раздела 17; нет ключа — включено. */
+    kinds: z.partialRecord(z.enum(REMINDER_KINDS), z.boolean()).optional(),
+  }),
   scenario: z.enum(['min', 'expected', 'max']),
 });
 export type Settings = z.infer<typeof SettingsSchema>;
@@ -177,14 +196,14 @@ export const DEFAULT_SETTINGS: Settings = {
   scenario: 'expected',
 };
 
-/** Параметры симулятора (раздел 13) — схема уточняется в M9, сервер хранит как есть. */
-export const SimPresetSchema = z.record(z.string(), z.unknown());
+/** Параметры симулятора (раздел 13): форма «Молитв» хранится как есть, около 1 КБ (D-312). */
+export const SimPresetSchema = maxJson(z.record(z.string().max(100), z.unknown()), 16);
 
 /** Пользовательские области, категории, ивенты (11.1) — `confidence: 'user'`. */
 export const UserEntitySchema = z.object({
   id: DocIdSchema,
   kind: z.enum(['area', 'category', 'event']),
-  data: z.record(z.string(), z.unknown()),
+  data: maxJson(z.record(z.string().max(100), z.unknown()), 16),
 });
 
 export const COLLECTIONS = [

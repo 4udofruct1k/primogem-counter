@@ -33,6 +33,32 @@ export const RewardSchema = z.object({
 
 export const DocIdSchema = z.string().min(1).max(200);
 
+/** Длина строки в байтах UTF-8 — без TextEncoder и копии строки. */
+export function utf8Length(s: string): number {
+  let n = s.length;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c < 0x80) continue;
+    if (c < 0x800) n += 1;
+    // суррогатная пара — 4 байта на две единицы UTF-16, одиночная — 3 байта (как U+FFFD)
+    else if (c >= 0xd800 && c <= 0xdbff && (s.charCodeAt(i + 1) & 0xfc00) === 0xdc00) {
+      n += 2;
+      i++;
+    } else n += 2;
+  }
+  return n;
+}
+
+/** Размер значения в JSON, байты UTF-8: так документ уходит по сети и учитывается в лимитах (D-312). */
+export function jsonBytes(value: unknown): number {
+  const s = JSON.stringify(value) as string | undefined;
+  return s === undefined ? 0 : utf8Length(s);
+}
+
+/** Свободное поле без своей схемы — не больше `kb` КБ в JSON (D-312). */
+export const maxJson = <T extends z.ZodType>(schema: T, kb: number): T =>
+  schema.refine((v) => jsonBytes(v) <= kb * 1024, `не больше ${kb} КБ в JSON`);
+
 const nonNeg = z.number().int().min(0);
 export const PitySchema = z.object({
   char: nonNeg.max(89),

@@ -51,6 +51,11 @@ export const HealthResponseSchema = z.object({
 
 /** Пакет синхронизации — до 500 изменений (14.5). */
 export const SYNC_BATCH_LIMIT = 500;
+/**
+ * Предел одного документа — 256 КБ JSON (`jsonBytes`). Больший сервер не сохраняет и возвращает в `rejected`
+ * (D-312). Настоящие документы — единицы КБ.
+ */
+export const DOC_MAX_BYTES = 256 * 1024;
 
 export const SyncChangeSchema = z.object({
   collection: CollectionSchema,
@@ -61,6 +66,11 @@ export const SyncChangeSchema = z.object({
 export const SyncRequestSchema = z.object({
   cursor: z.number().int().min(0),
   changes: z.array(SyncChangeSchema).max(SYNC_BATCH_LIMIT),
+  /**
+   * Эпоха данных сервера из последнего применённого ответа (D-315). Не совпала с текущей — база восстановлена
+   * из бэкапа: сервер не верит курсору и `baseVersion > 0`, отдаёт всё с нуля. Нет поля — как раньше.
+   */
+  epoch: z.string().max(64).optional(),
 });
 export const SyncResponseSchema = z.object({
   applied: z.array(
@@ -83,15 +93,21 @@ export const SyncResponseSchema = z.object({
     }),
   ),
   cursor: z.number(),
-  /** На сервере есть ещё изменения после `cursor` — повторить запрос. */
+  /**
+   * Повторить запрос: на сервере есть ещё изменения после `cursor` или сервер обработал не все изменения запроса
+   * (необработанные не попали ни в `applied`, ни в `conflicts`, ни в `rejected` — их нужно отправить снова, D-313).
+   */
   more: z.boolean().optional(),
   /**
-   * Изменения, которые сервер отклонил и не сохранил: документ не прошёл схему коллекции или это удаление
-   * из коллекции «только добавление». Остальные изменения запроса применяются как обычно.
+   * Изменения, которые сервер отклонил и не сохранил: документ не прошёл схему коллекции, больше `DOC_MAX_BYTES`,
+   * не помещается в лимиты аккаунта или это удаление из коллекции «только добавление». Остальные изменения запроса
+   * применяются как обычно.
    */
   rejected: z
     .array(z.object({ collection: CollectionSchema, id: z.string(), message: z.string() }))
     .optional(),
+  /** Эпоха данных сервера (D-315): клиент хранит её рядом с `cursor` и шлёт в следующих запросах. */
+  epoch: z.string().optional(),
 });
 export type SyncChange = z.infer<typeof SyncChangeSchema>;
 export type SyncRequest = z.infer<typeof SyncRequestSchema>;

@@ -6,6 +6,8 @@ export class ApiFailure extends Error {
     readonly status: number,
     readonly code: ApiError['error']['code'] | 'NETWORK',
     message: string,
+    /** Retry-After у 429, с. */
+    readonly retryAfter: number | null = null,
   ) {
     super(message);
   }
@@ -30,7 +32,13 @@ export function createApi(fetchImpl: Fetch) {
     const json = text ? (JSON.parse(text) as unknown) : null;
     if (!res.ok) {
       const err = (json as ApiError | null)?.error;
-      throw new ApiFailure(res.status, err?.code ?? 'INTERNAL', err?.message ?? `HTTP ${res.status}`);
+      const retry = Number(res.headers.get('retry-after'));
+      throw new ApiFailure(
+        res.status,
+        err?.code ?? 'INTERNAL',
+        err?.message ?? `HTTP ${res.status}`,
+        Number.isFinite(retry) && retry > 0 ? retry : null,
+      );
     }
     return json as T;
   }

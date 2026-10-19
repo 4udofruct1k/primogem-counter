@@ -80,8 +80,13 @@ export function AccountCard() {
         <Button onClick={() => setSheet('password')}>Пароль и код восстановления</Button>
         <Button
           onClick={async () => {
-            const data = await api.exportAll();
-            downloadText(`primo-export-${account.username}.json`, JSON.stringify(data, null, 2));
+            try {
+              const data = await api.exportAll();
+              downloadText(`primo-export-${account.username}.json`, JSON.stringify(data, null, 2));
+            } catch (e) {
+              // 429 — экспорт уже идёт; оборванный поток — неполный JSON
+              store.getState().notify(`Экспорт не получился — попробуйте ещё раз (${errorText(e)})`, 'error');
+            }
           }}
         >
           Экспорт всех данных
