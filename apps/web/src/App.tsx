@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { EndgameScreen } from './screens/EndgameScreen';
+import { ForecastScreen } from './screens/ForecastScreen';
 import { MoreScreen } from './screens/MoreScreen';
 import { Placeholder } from './screens/Placeholder';
 import { RegionsScreen } from './screens/RegionsScreen';
@@ -77,7 +78,7 @@ function renderScreen(screen: string): ReactNode {
     case 'more':
       return <MoreScreen />;
     case 'forecast':
-      return <Placeholder title="Прогноз" />;
+      return <ForecastScreen />;
     case 'regions':
       return <RegionsScreen />;
     case 'endgame':
