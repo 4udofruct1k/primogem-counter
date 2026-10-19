@@ -1,0 +1,94 @@
+# Прод (15.2): db, api, web (одноразовая сборка статики), caddy (HTTPS), backup (ежедневный pg_dump).
+# Запуск из папки deploy/: cp .env.example .env && nano .env && docker compose -f compose.prod.yml up -d --build
+name: primo
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: primo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в deploy/.env}
+      POSTGRES_DB: primo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U primo -d primo']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [primo]
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://primo:${POSTGRES_PASSWORD}@db:5432/primo
+      DOMAIN: ${DOMAIN:?задайте DOMAIN в deploy/.env}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [primo]
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    restart: 'no'
+    volumes:
+      - webdist:/out
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - webdist:/srv/web:ro
+      - ../data:/srv/data:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
+    networks: [primo]
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: primo
+      PGDATABASE: primo
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      # POSIX TZ: UTC+5 (Уфа) без tzdata — cron в 04:30 по местному
+      TZ: UTC-5
+    volumes:
+      - ./backup.sh:/usr/local/bin/backup.sh:ro
+      - ./backups:/backups
+    entrypoint: ['/bin/sh', '-c', 'echo "30 4 * * * /usr/local/bin/backup.sh" > /etc/crontabs/root && exec crond -f -l 8']
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [primo]
+
+volumes:
+  pgdata:
+  webdist:
+  caddy_data:
+  caddy_config:
+
+networks:
+  primo:

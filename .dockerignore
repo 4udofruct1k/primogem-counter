@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/dev-dist
+**/coverage
+.git
+deploy/.env
+deploy/backups
+**/.pglite
+playwright-report
+test-results
