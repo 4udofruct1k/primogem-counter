@@ -4,15 +4,16 @@ import { AdminPatchBodySchema, DatapackSchema } from '@primo/shared';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { userOf } from '../auth/sessions';
 import { adminPatches } from '../db/schema';
-import { isAdmin, type Deps } from '../deps';
+import type { Deps } from '../deps';
 import { conflict, forbidden, formatIssues, parse, validation } from '../errors';
 import { latestPatch } from '../gamedata';
 
 export async function adminRoutes(app: FastifyInstance, deps: Deps): Promise<void> {
-  const { db, sessions, files, config } = deps;
+  const { db, sessions, files } = deps;
 
+  // права — флаг аккаунта от оператора (D-316), а не логин: занятый заранее или заново логин прав не даёт
   const requireAdmin = async (req: FastifyRequest) => {
-    if (!isAdmin(config, userOf(req).username)) throw forbidden('Только для админов данных');
+    if (!userOf(req).isAdmin) throw forbidden('Только для админов данных');
   };
   const admin = { preHandler: [sessions.authenticate, requireAdmin] };
 

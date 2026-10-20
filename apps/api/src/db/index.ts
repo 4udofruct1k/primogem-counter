@@ -24,6 +24,12 @@ export interface OpenOptions {
   onError?: (err: Error) => void;
 }
 
+/**
+ * Пул node-postgres: 10 соединений; ожидание свободного — не дольше 5 с, дальше ошибка, а не бесконечная очередь,
+ * в которой стоят все запросы сервера (D-314).
+ */
+export const POOL = { max: 10, connectionTimeoutMillis: 5000 } as const;
+
 export async function openDatabase(url: string, options: OpenOptions = {}): Promise<Database> {
   if (url.startsWith(PGLITE_PREFIX)) {
     // PGlite — dev-зависимость: грузится только по явному запросу, в прод-сборку не входит
@@ -31,7 +37,7 @@ export async function openDatabase(url: string, options: OpenOptions = {}): Prom
     const dir = url.slice(PGLITE_PREFIX.length);
     return openPglite(dir === '' || dir === 'memory' ? undefined : dir);
   }
-  const pool = new pg.Pool({ connectionString: url, max: 10 });
+  const pool = new pg.Pool({ connectionString: url, ...POOL });
   pool.on('error', (err) => options.onError?.(err));
   const db = drizzle({ client: pool });
   return {

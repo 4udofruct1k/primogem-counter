@@ -1,7 +1,7 @@
 // Точка входа api: настройки → БД → миграции → HTTP (15.2: миграции применяются при старте).
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from './app';
-import { ConfigError, loadConfig } from './config';
+import { ConfigError, configWarnings, loadConfig } from './config';
 import { openDatabase } from './db';
 
 async function main(): Promise<void> {
@@ -15,6 +15,7 @@ async function main(): Promise<void> {
   app = await buildApp({ config, db: database.db });
   app.addHook('onClose', () => database.close());
   app.log.info({ migrationsDir: config.migrationsDir, dataDir: config.dataDir }, 'миграции применены');
+  for (const warning of configWarnings()) app.log.warn(warning);
 
   const stop = (signal: string) => {
     app?.log.info({ signal }, 'остановка');

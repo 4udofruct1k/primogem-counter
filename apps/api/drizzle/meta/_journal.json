@@ -15,6 +15,20 @@
       "when": 1792386817179,
       "tag": "0001_init",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792425848500,
+      "tag": "0002_sync_limits",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792426913875,
+      "tag": "0003_admin_flag",
+      "breakpoints": true
     }
   ]
 }

@@ -18,6 +18,15 @@ export interface DataFile {
 
 export const sha256 = (data: string | Buffer) => createHash('sha256').update(data).digest('hex');
 
+/** Версия содержимого в ссылке на файл данных (D-317): первые 16 hex его SHA-256. */
+export const contentVersion = (sha: string) => sha.slice(0, 16);
+
+/**
+ * Ссылка из манифеста: `<путь>?v=<версия содержимого>`. Новое содержимое — новый URL, которого нет в HTTP-кэше
+ * браузера (14.4: «immutable по имени с версией»); статика и Caddy query-строку при поиске файла не учитывают.
+ */
+export const versionedPath = (p: string, sha: string) => `${p}?v=${contentVersion(sha)}`;
+
 /** Файлы data/ с кэшем по mtime и размеру: правка файла без перезапуска сразу видна в манифесте. */
 export class GameFiles {
   private readonly cache = new Map<string, DataFile & { mtimeMs: number; size: number }>();
@@ -51,6 +60,16 @@ export class GameFiles {
 
   async datapack(): Promise<DataFile> {
     return this.read(await this.datapackName());
+  }
+
+  /**
+   * Отдаваемый файл `filePath` (его stat) — ровно та версия `v`, что была в манифесте: запись кэша с тем же mtime и
+   * размером и тем же хэшем. Нет записи (файл не попадал в манифест этого процесса) или файл с тех пор менялся — нет.
+   */
+  isVersion(filePath: string, st: { mtimeMs: number; size: number }, v: string): boolean {
+    if (path.dirname(filePath) !== path.resolve(this.dir)) return false;
+    const hit = this.cache.get(path.basename(filePath));
+    return !!hit && hit.mtimeMs === st.mtimeMs && hit.size === st.size && contentVersion(hit.sha256) === v;
   }
 }
 
@@ -87,16 +106,19 @@ export async function buildManifest(files: GameFiles, db: Db): Promise<Manifest>
     packVersion: numberField(pack.json, 'packVersion'),
     seedSchemaVersion: numberField(seed.json, 'schemaVersion'),
     files: {
-      datapack: { path: `/data/${pack.name}`, sha256: pack.sha256 },
-      seed: { path: `/data/${seed.name}`, sha256: seed.sha256 },
+      datapack: { path: versionedPath(`/data/${pack.name}`, pack.sha256), sha256: pack.sha256 },
+      seed: { path: versionedPath(`/data/${seed.name}`, seed.sha256), sha256: seed.sha256 },
     },
-    patch: patch
-      ? {
-          version: patch.version,
-          sha256: sha256(patchBody(patch)),
-          path: patchPath(patch.version),
-          updatedAt: patch.createdAt.toISOString(),
-        }
-      : null,
+    patch: patch ? patchRef(patch) : null,
+  };
+}
+
+function patchRef(patch: StoredPatch): NonNullable<Manifest['patch']> {
+  const hash = sha256(patchBody(patch));
+  return {
+    version: patch.version,
+    sha256: hash,
+    path: versionedPath(patchPath(patch.version), hash),
+    updatedAt: patch.createdAt.toISOString(),
   };
 }

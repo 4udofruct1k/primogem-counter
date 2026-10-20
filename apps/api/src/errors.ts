@@ -20,8 +20,18 @@ export const badCredentials = (message = 'Неверный логин или п�
 export const forbidden = (message: string) => new ApiError(403, 'FORBIDDEN', message);
 export const notFound = (message = 'Не найдено') => new ApiError(404, 'NOT_FOUND', message);
 export const conflict = (message: string) => new ApiError(409, 'CONFLICT', message);
-export const rateLimited = (seconds: number) =>
-  new ApiError(429, 'RATE_LIMIT', `Слишком много попыток — повторите через ${seconds} с`);
+export const rateLimited = (seconds: number, what = 'Слишком много попыток') =>
+  new ApiError(429, 'RATE_LIMIT', `${what} — повторите через ${seconds} с`);
+
+/** Код ошибки Postgres (`55P03` и т. п.); drizzle заворачивает ошибку драйвера в `cause`. */
+export function pgCode(err: unknown): string | undefined {
+  for (let e = err, depth = 0; e && typeof e === 'object' && depth < 5; depth++) {
+    const code = (e as { code?: unknown }).code;
+    if (typeof code === 'string') return code;
+    e = (e as { cause?: unknown }).cause;
+  }
+  return undefined;
+}
 
 /** Первые ошибки zod одной строкой: «username: логин: 3–32 символа…». */
 export function formatIssues(error: z.ZodError, limit = 3): string {

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { applyDatapackPatch, type DatapackPatchLike, type RawDatapack } from '@primo/domain';
 import { DatapackPatchSchema, ManifestSchema, type Manifest } from '@primo/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { setAdmin } from '../admins';
 import { buildApp } from '../app';
 import { ADMIN, createTestContext, errorCode, type TestClient, type TestContext } from '../test/helpers';
 
@@ -21,6 +22,10 @@ afterAll(async () => {
 const sha256 = (s: string | Buffer) => createHash('sha256').update(s).digest('hex');
 const DATAPACK = 'datapack-2026-10-19.json';
 const SEED = 'primo_seed_regions.json';
+const IMMUTABLE = 'public, max-age=31536000, immutable';
+const SHORT = 'public, max-age=300';
+/** Ссылка из манифеста (D-317): версия — первые 16 hex SHA-256 содержимого. */
+const versioned = (p: string, sha: string) => `${p}?v=${sha.slice(0, 16)}`;
 
 async function manifest(c: TestClient = ctx.client()): Promise<Manifest> {
   const res = await c.get('/data/manifest.json');
@@ -37,22 +42,43 @@ describe('игровые данные /data (14.6)', () => {
 
     const packRaw = await readFile(path.join(ctx.config.dataDir, DATAPACK));
     const seedRaw = await readFile(path.join(ctx.config.dataDir, SEED));
-    expect(m.files.datapack).toEqual({ path: `/data/${DATAPACK}`, sha256: sha256(packRaw) });
-    expect(m.files.seed).toEqual({ path: `/data/${SEED}`, sha256: sha256(seedRaw) });
+    expect(m.files.datapack).toEqual({
+      path: versioned(`/data/${DATAPACK}`, sha256(packRaw)),
+      sha256: sha256(packRaw),
+    });
+    expect(m.files.seed).toEqual({
+      path: versioned(`/data/${SEED}`, sha256(seedRaw)),
+      sha256: sha256(seedRaw),
+    });
     expect(m.packVersion).toBe(JSON.parse(packRaw.toString('utf8')).packVersion);
     expect(m.seedSchemaVersion).toBe(JSON.parse(seedRaw.toString('utf8')).schemaVersion);
     expect(m.patch).toBeNull();
     expect(Number.isNaN(Date.parse(m.generatedAt))).toBe(false);
   });
 
-  it('файлы по путям манифеста: тот же хэш, Cache-Control public, max-age=300', async () => {
+  it('файлы по ссылкам манифеста — тот же хэш и immutable; без версии или с чужой — max-age=300 (D-317)', async () => {
     const m = await manifest();
-    for (const ref of [m.files.datapack, m.files.seed]) {
+    for (const [name, ref] of [
+      [DATAPACK, m.files.datapack],
+      [SEED, m.files.seed],
+    ] as const) {
       const res = await ctx.client().get(ref.path);
       expect(res.statusCode).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/json/);
-      expect(res.headers['cache-control']).toBe('public, max-age=300');
+      expect(res.headers['cache-control']).toBe(IMMUTABLE);
       expect(sha256(res.rawPayload)).toBe(ref.sha256);
+
+      for (const url of [
+        `/data/${name}`,
+        `/data/${name}?v=0123456789abcdef`,
+        `/data/${name}?v=${ref.sha256}`,
+        `${ref.path}&v=0123456789abcdef`,
+      ]) {
+        const other = await ctx.client().get(url);
+        expect(other.statusCode, url).toBe(200);
+        expect(other.headers['cache-control'], url).toBe(SHORT);
+        expect(sha256(other.rawPayload), url).toBe(ref.sha256);
+      }
     }
     expect((await ctx.client().get(`/data/${DATAPACK}`)).json()).toMatchObject({ gameVersion: '7.1' });
   });
@@ -65,7 +91,7 @@ describe('игровые данные /data (14.6)', () => {
     }
   });
 
-  it('датапак — самый новый data/datapack-*.json; правка файла меняет хэш в манифесте', async () => {
+  it('датапак — самый новый data/datapack-*.json; правка файла меняет хэш и ссылку в манифесте', async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), 'primo-data-'));
     try {
       await copyFile(path.join(ctx.config.dataDir, SEED), path.join(dir, SEED));
@@ -79,17 +105,34 @@ describe('игровые данные /data (14.6)', () => {
         const get = async () =>
           ManifestSchema.parse((await app.inject({ url: '/data/manifest.json' })).json());
         const m1 = await get();
-        expect(m1.files.datapack.path).toBe(`/data/${newer}`);
+        expect(m1.files.datapack.path).toBe(versioned(`/data/${newer}`, m1.files.datapack.sha256));
         expect(m1.packVersion).toBe(pack.packVersion + 1);
+        const v1 = await app.inject({ url: m1.files.datapack.path });
+        expect(v1.headers['cache-control']).toBe(IMMUTABLE);
+        expect(sha256(v1.rawPayload)).toBe(m1.files.datapack.sha256);
 
         await writeFile(
           path.join(dir, newer),
           JSON.stringify({ ...pack, packVersion: pack.packVersion + 2 }, null, 1),
         );
+        // F1: файл правят на месте; прежняя ссылка теперь отдаёт другое содержимое — его нельзя кэшировать
+        // навсегда под старой версией, даже пока манифест ещё не пересобран
+        const stale = await app.inject({ url: m1.files.datapack.path });
+        expect(stale.statusCode).toBe(200);
+        expect(stale.headers['cache-control']).toBe(SHORT);
+        expect(stale.json()).toMatchObject({ packVersion: pack.packVersion + 2 });
+
         const m2 = await get();
         expect(m2.packVersion).toBe(pack.packVersion + 2);
         expect(m2.files.datapack.sha256).not.toBe(m1.files.datapack.sha256);
         expect(m2.files.datapack.sha256).toBe(sha256(await readFile(path.join(dir, newer))));
+        // новое содержимое — новый URL: браузер не может взять его из своего HTTP-кэша
+        expect(m2.files.datapack.path).not.toBe(m1.files.datapack.path);
+        expect(m2.files.datapack.path).toBe(versioned(`/data/${newer}`, m2.files.datapack.sha256));
+        const v2 = await app.inject({ url: m2.files.datapack.path });
+        expect(v2.headers['cache-control']).toBe(IMMUTABLE);
+        expect(sha256(v2.rawPayload)).toBe(m2.files.datapack.sha256);
+        expect((await app.inject({ url: m1.files.datapack.path })).headers['cache-control']).toBe(SHORT);
       } finally {
         await app.close();
       }
@@ -112,12 +155,14 @@ describe('админка данных: патч датапака', () => {
   beforeAll(async () => {
     admin = ctx.client();
     await admin.register('Data_Admin');
+    // права выдаёт оператор (D-316): та же функция, что у `node dist/cli.js admin grant`
+    await setAdmin(ctx.database.db, ADMIN, true);
     user = ctx.client();
     await user.register('plain_user');
     base = JSON.parse(await readFile(path.join(ctx.config.dataDir, DATAPACK), 'utf8')) as RawDatapack;
   });
 
-  it('админы — из ADMIN_USERNAMES без учёта регистра; /api/me.isAdmin', async () => {
+  it('админ — флаг аккаунта от оператора; /api/me.isAdmin', async () => {
     expect(ADMIN).toBe('data_admin');
     expect((await admin.get('/api/me')).json()).toMatchObject({ username: 'data_admin', isAdmin: true });
     expect((await user.get('/api/me')).json()).toMatchObject({ isAdmin: false });
@@ -157,12 +202,24 @@ describe('админка данных: патч датапака', () => {
     expect(Number.isNaN(Date.parse(current.updatedAt))).toBe(false);
 
     const m = await manifest(user);
-    expect(m.patch).toMatchObject({ version: 1, path: '/data/patch-1.json', updatedAt: current.updatedAt });
+    expect(m.patch).toMatchObject({
+      version: 1,
+      path: versioned('/data/patch-1.json', m.patch!.sha256),
+      updatedAt: current.updatedAt,
+    });
     const file = await ctx.client().get(m.patch!.path);
     expect(file.statusCode).toBe(200);
     expect(file.headers['content-type']).toMatch(/application\/json/);
-    expect(file.headers['cache-control']).toBe('public, max-age=31536000, immutable');
+    expect(file.headers['cache-control']).toBe(IMMUTABLE);
     expect(sha256(file.rawPayload)).toBe(m.patch!.sha256);
+    // номер версии патча повторяется после восстановления БД из бэкапа (15.5) — навсегда кэшируется только
+    // ссылка с хэшем содержимого
+    for (const url of ['/data/patch-1.json', '/data/patch-1.json?v=0123456789abcdef']) {
+      const other = await ctx.client().get(url);
+      expect(other.statusCode, url).toBe(200);
+      expect(other.headers['cache-control'], url).toBe(SHORT);
+      expect(sha256(other.rawPayload), url).toBe(m.patch!.sha256);
+    }
 
     // клиент (apps/web/src/data/gamedata.ts) парсит патч и накладывает на датапак
     const parsed = DatapackPatchSchema.parse(file.json()) as DatapackPatchLike;
@@ -178,7 +235,9 @@ describe('админка данных: патч датапака', () => {
 
     const next = await admin.put('/api/admin/patch', { patch: patch2, baseVersion: 1 });
     expect(next.json()).toEqual({ version: 2 });
-    expect((await manifest()).patch).toMatchObject({ version: 2, path: '/data/patch-2.json' });
+    const m2 = await manifest();
+    expect(m2.patch).toMatchObject({ version: 2, path: versioned('/data/patch-2.json', m2.patch!.sha256) });
+    expect(m2.patch!.path).not.toBe(m.patch!.path);
     // старые версии неизменны
     expect((await ctx.client().get('/data/patch-1.json')).json()).toEqual(patch1);
     expect((await ctx.client().get('/data/patch-2.json')).json()).toEqual(patch2);

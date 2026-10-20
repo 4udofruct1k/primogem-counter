@@ -14,7 +14,3 @@ export interface Deps {
   limiters: Limiters;
   files: GameFiles;
 }
-
-/** Админ данных — логин из ADMIN_USERNAMES (без учёта регистра). */
-export const isAdmin = (config: Pick<Config, 'adminUsernames'>, username: string) =>
-  config.adminUsernames.includes(username.toLowerCase());

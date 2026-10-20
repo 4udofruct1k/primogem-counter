@@ -14,6 +14,7 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
     ...loadConfig({
       NODE_ENV: 'test',
       PUBLIC_ORIGIN: TEST_ORIGIN,
+      // устаревшая переменная: прав не даёт (D-316), тесты проверяют, что она не читается
       ADMIN_USERNAMES: `${ADMIN.toUpperCase()}, someone_else`,
       APP_VERSION: 'test',
       COOKIE_SECURE: 'true',

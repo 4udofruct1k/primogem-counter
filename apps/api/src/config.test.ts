@@ -1,6 +1,7 @@
+import { DOC_MAX_BYTES } from '@primo/shared';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ARGON2_PARAMS, ConfigError, DEV_DATABASE_URL, loadConfig } from './config';
+import { ARGON2_PARAMS, ConfigError, configWarnings, DEV_DATABASE_URL, loadConfig } from './config';
 
 const PROD = {
   NODE_ENV: 'production',
@@ -22,6 +23,23 @@ describe('config', () => {
     expect(c.dataDir).toBe(path.resolve(import.meta.dirname, '../../../data'));
     expect(c.syncPullLimit).toBe(1000);
     expect(c.trustProxy).toBe('loopback,uniquelocal');
+  });
+
+  it('лимиты синхронизации и квоты аккаунта (D-312–D-314)', () => {
+    const c = loadConfig(PROD);
+    expect(c.docMaxBytes).toBe(DOC_MAX_BYTES);
+    expect(c.syncPullMaxBytes).toBe(1024 * 1024);
+    expect(c.userMaxDocs).toBe(200_000);
+    expect(c.userMaxBytes).toBe(32 * 1024 * 1024);
+    expect(c.syncWritesPerMinute).toBe(60);
+    expect(c.syncLockTimeoutMs).toBe(5000);
+    expect(c.syncStatementTimeoutMs).toBe(15_000);
+
+    const custom = loadConfig({ ...PROD, USER_MAX_DOCS: '500000', USER_MAX_MB: '128' });
+    expect(custom.userMaxDocs).toBe(500_000);
+    expect(custom.userMaxBytes).toBe(128 * 1024 * 1024);
+    expect(() => loadConfig({ ...PROD, USER_MAX_DOCS: '0' })).toThrow(/USER_MAX_DOCS/);
+    expect(() => loadConfig({ ...PROD, USER_MAX_MB: '1.5' })).toThrow(/USER_MAX_MB/);
   });
 
   it('production без DATABASE_URL или без домена — ошибка при старте', () => {
@@ -52,7 +70,13 @@ describe('config', () => {
       APP_VERSION: '1.2.3',
     });
     expect(c.allowedOrigins).toEqual(['https://primo.example.ru', 'https://alt.example.ru']);
-    expect(c.adminUsernames).toEqual(['paimon', 'data_admin']);
+    // ADMIN_USERNAMES больше не даёт прав (D-316): в настройках её нет, при старте — предупреждение
+    expect(c).not.toHaveProperty('adminUsernames');
+    expect(configWarnings({ ADMIN_USERNAMES: ' Paimon , ,DATA_admin' })).toEqual([
+      expect.stringMatching(/ADMIN_USERNAMES.*admin grant/),
+    ]);
+    expect(configWarnings({ ADMIN_USERNAMES: ' ' })).toEqual([]);
+    expect(configWarnings({})).toEqual([]);
     expect(c.sessionTtlDays).toBe(7);
     expect(c.cookieSecure).toBe(false);
     expect(c.port).toBe(8080);

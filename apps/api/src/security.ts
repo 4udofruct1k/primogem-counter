@@ -1,6 +1,6 @@
 // Защита (14.2): проверка Origin на изменяющих запросах и лимиты попыток (@fastify/rate-limit).
 import rateLimit from '@fastify/rate-limit';
-import type { FastifyInstance, FastifyRequest, preHandlerAsyncHookHandler } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest, preHandlerAsyncHookHandler } from 'fastify';
 import { forbidden, rateLimited } from './errors';
 
 const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -36,6 +36,28 @@ function accountKey(req: FastifyRequest): string {
   if (req.user) return `user:${req.user.username}`;
   const username = (req.body as { username?: unknown } | null | undefined)?.username;
   return typeof username === 'string' ? `user:${username.trim().toLowerCase()}` : `ip:${req.ip}`;
+}
+
+/**
+ * /api/sync с изменениями: не больше `perMinute` в минуту на пользователя, с любых устройств (D-314).
+ * Вызывается в обработчике после `authenticate`; чтение без изменений не считается.
+ */
+export function createSyncWriteLimit(
+  app: FastifyInstance,
+  perMinute: number,
+): (req: FastifyRequest, reply: FastifyReply) => Promise<void> {
+  const check = app.createRateLimit({
+    max: perMinute,
+    timeWindow: 60_000,
+    keyGenerator: (req) => `sync:${req.user?.id ?? req.ip}`,
+  });
+  return async (req, reply) => {
+    const r = await check(req);
+    if (!r.isAllowed && r.isExceeded) {
+      reply.header('retry-after', r.ttlInSeconds);
+      throw rateLimited(r.ttlInSeconds, 'Слишком много синхронизаций');
+    }
+  };
 }
 
 export async function createLimiters(app: FastifyInstance): Promise<Limiters> {

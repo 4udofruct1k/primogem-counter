@@ -15,6 +15,8 @@ export interface AuthUser {
   id: string;
   username: string;
   createdAt: Date;
+  /** Админ данных: флаг `users.is_admin` (D-316), читается при каждом запросе — снятие действует сразу. */
+  isAdmin: boolean;
   /** Id текущей сессии (SHA-256 токена). */
   sessionId: string;
 }
@@ -66,6 +68,7 @@ export class SessionStore {
         userId: users.id,
         username: users.username,
         createdAt: users.createdAt,
+        isAdmin: users.isAdmin,
       })
       .from(sessions)
       .innerJoin(users, eq(users.id, sessions.userId))
@@ -84,7 +87,13 @@ export class SessionStore {
         .where(eq(sessions.id, id));
       this.setCookie(reply, token);
     }
-    req.user = { id: row.userId, username: row.username, createdAt: row.createdAt, sessionId: id };
+    req.user = {
+      id: row.userId,
+      username: row.username,
+      createdAt: row.createdAt,
+      isAdmin: row.isAdmin,
+      sessionId: id,
+    };
   };
 
   /** Выход: сессия из cookie удаляется, если есть. */

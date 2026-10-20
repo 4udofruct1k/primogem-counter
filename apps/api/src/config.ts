@@ -1,4 +1,5 @@
 // Настройки сервера из переменных окружения (15.2). Секреты — только из окружения, в коде их нет.
+import { DOC_MAX_BYTES } from '@primo/shared';
 import path from 'node:path';
 
 /** Параметры argon2id (14.2). */
@@ -30,8 +31,6 @@ export interface Config {
   sessionTtlDays: number;
   /** Разрешённые значения заголовка Origin для изменяющих запросов и CORS. */
   allowedOrigins: string[];
-  /** Логины админов данных, в нижнем регистре. */
-  adminUsernames: string[];
   cookieSecure: boolean;
   /** Fastify `trustProxy`: адреса доверенных прокси перед api (Caddy в docker-сети), true или false. */
   trustProxy: string | boolean;
@@ -39,6 +38,22 @@ export interface Config {
   argon2: Argon2Params;
   /** Сколько изменений отдаёт один ответ /api/sync, остальное — `more: true` (D-306). */
   syncPullLimit: number;
+  /**
+   * Бюджет байт данных документов в одном ответе /api/sync — отдельно для `changes` и для `conflicts` — и в одной
+   * странице чтения экспорта; первый документ — всегда (D-313).
+   */
+  syncPullMaxBytes: number;
+  /** Предел одного документа, байт JSON; больший — в `rejected` (D-312). */
+  docMaxBytes: number;
+  /** Квота аккаунта: строк в user_docs, включая удалённые (D-312). */
+  userMaxDocs: number;
+  /** Квота аккаунта: сумма размеров документов, байт JSON (D-312). */
+  userMaxBytes: number;
+  /** Запросов /api/sync с изменениями в минуту на пользователя (D-314). */
+  syncWritesPerMinute: number;
+  /** `lock_timeout` и `statement_timeout` транзакции /api/sync, мс (D-314). */
+  syncLockTimeoutMs: number;
+  syncStatementTimeoutMs: number;
 }
 
 export class ConfigError extends Error {}
@@ -89,12 +104,29 @@ function trustProxy(raw: string | undefined): string | boolean {
   return v;
 }
 
+/** DATABASE_URL: в production обязателен, иначе — Postgres из compose.dev.yml. Им же пользуется CLI оператора. */
+export function databaseUrlFrom(env: NodeJS.ProcessEnv = process.env): string {
+  const databaseUrl = env.DATABASE_URL ?? (env.NODE_ENV === 'production' ? '' : DEV_DATABASE_URL);
+  if (!databaseUrl) throw new ConfigError('DATABASE_URL не задан (обязателен при NODE_ENV=production)');
+  return databaseUrl;
+}
+
+/**
+ * Предупреждения для лога при старте: переменные, которые больше ничего не делают. ADMIN_USERNAMES прав не даёт
+ * (D-316) — логин мог занять кто угодно; без предупреждения админ после обновления молча потерял бы доступ.
+ */
+export function configWarnings(env: NodeJS.ProcessEnv = process.env): string[] {
+  if (list(env.ADMIN_USERNAMES).length === 0) return [];
+  return [
+    'ADMIN_USERNAMES больше не даёт прав админа данных (D-316): выдайте их командой ' +
+      '`node dist/cli.js admin grant <логин>` и уберите переменную из .env',
+  ];
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const nodeEnv = env.NODE_ENV ?? 'development';
   const production = nodeEnv === 'production';
-
-  const databaseUrl = env.DATABASE_URL ?? (production ? '' : DEV_DATABASE_URL);
-  if (!databaseUrl) throw new ConfigError('DATABASE_URL не задан (обязателен при NODE_ENV=production)');
+  const databaseUrl = databaseUrlFrom(env);
 
   const origins = list(env.PUBLIC_ORIGIN).map((o) => origin(o, 'PUBLIC_ORIGIN'));
   if (env.DOMAIN) origins.push(origin(`https://${env.DOMAIN.trim()}`, 'DOMAIN'));
@@ -114,11 +146,17 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     databaseUrl,
     sessionTtlDays: int(env, 'SESSION_TTL_DAYS', 30, 1, 365),
     allowedOrigins: [...new Set(origins)],
-    adminUsernames: list(env.ADMIN_USERNAMES).map((u) => u.toLowerCase()),
     cookieSecure: bool(env, 'COOKIE_SECURE', production),
     trustProxy: trustProxy(env.TRUST_PROXY),
     logLevel: env.LOG_LEVEL ?? 'info',
     argon2: ARGON2_PARAMS,
     syncPullLimit: 1000,
+    syncPullMaxBytes: 1024 * 1024,
+    docMaxBytes: DOC_MAX_BYTES,
+    userMaxDocs: int(env, 'USER_MAX_DOCS', 200_000, 1000, 100_000_000),
+    userMaxBytes: int(env, 'USER_MAX_MB', 32, 1, 100_000) * 1024 * 1024,
+    syncWritesPerMinute: 60,
+    syncLockTimeoutMs: 5000,
+    syncStatementTimeoutMs: 15_000,
   };
 }

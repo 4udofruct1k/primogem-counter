@@ -12,13 +12,13 @@ import type { FastifyInstance } from 'fastify';
 import { newRecoveryCode } from '../auth/secrets';
 import { userOf } from '../auth/sessions';
 import { users } from '../db/schema';
-import { isAdmin, type Deps } from '../deps';
+import type { Deps } from '../deps';
 import { badCredentials, conflict, parse } from '../errors';
 
 const OK = { ok: true } as const;
 
 export async function authRoutes(app: FastifyInstance, deps: Deps): Promise<void> {
-  const { db, sessions, secrets, limiters, config } = deps;
+  const { db, sessions, secrets, limiters } = deps;
   const authed = { preHandler: [sessions.authenticate, limiters.credentials] };
 
   const findUser = async (username: string) =>
@@ -120,7 +120,7 @@ export async function authRoutes(app: FastifyInstance, deps: Deps): Promise<void
       id: user.id,
       username: user.username,
       createdAt: user.createdAt.toISOString(),
-      isAdmin: isAdmin(config, user.username),
+      isAdmin: user.isAdmin,
     };
   });
 

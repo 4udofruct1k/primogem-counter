@@ -28,6 +28,11 @@ export const users = pgTable('users', {
   recoveryHash: text('recovery_hash').notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+  /** Квота (D-312): строк в user_docs (с удалёнными) и сумма их `size`; меняются только в /api/sync под блокировкой. */
+  docCount: integer('doc_count').notNull().default(0),
+  docBytes: bigint('doc_bytes', { mode: 'number' }).notNull().default(0),
+  /** Админ данных (D-316): ставит и снимает только оператор (`node dist/cli.js admin …`), не логин и не API. */
+  isAdmin: boolean('is_admin').notNull().default(false),
 });
 
 /** Сессии: `id` — SHA-256 от 256-битного токена из cookie (D-303). */
@@ -64,6 +69,8 @@ export const userDocs = pgTable(
       .default(sql`nextval('user_docs_seq')`),
     deleted: boolean('deleted').notNull().default(false),
     updatedAt: updatedAt(),
+    /** Размер `data` в JSON, байт UTF-8 (`jsonBytes`); у удалённого — 0. Квоты и страницы по байтам (D-312, D-313). */
+    size: integer('size').notNull().default(0),
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.collection, t.docId] }),

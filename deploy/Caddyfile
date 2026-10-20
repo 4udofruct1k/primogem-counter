@@ -1,5 +1,5 @@
-# Сайт «Копилка круток» (15.3). Манифест игровых данных и патч админки отдаёт api (хэши и версия патча из БД),
-# остальные data/*.json — статикой.
+# Сайт «Копилка круток» (15.3). Манифест игровых данных, патч админки и файлы по ссылкам манифеста (`?v=`) отдаёт
+# api (хэши и версия патча из БД), остальные data/*.json — статикой.
 {$DOMAIN} {
 	encode zstd gzip
 	header {
@@ -12,6 +12,16 @@
 	}
 	@dynamicData path /data/manifest.json /data/patch-*
 	handle @dynamicData {
+		reverse_proxy api:3000
+	}
+	# Ссылки из манифеста /data/<файл>?v=<хэш> (D-317) отдаёт api: манифест он строит по своей копии data/, сверяет
+	# хэш с отдаваемым файлом и только тогда ставит immutable. Здесь, в /srv/data (checkout на хосте), после
+	# `git pull` уже новые файлы, а api со старым манифестом ещё не пересобран.
+	@versionedData {
+		path /data/*
+		query v=*
+	}
+	handle @versionedData {
 		reverse_proxy api:3000
 	}
 	handle /data/* {
